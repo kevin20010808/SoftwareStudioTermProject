@@ -8,6 +8,7 @@ Goals: **Empathize users** and **marketing**
 ```Inplicit goals is : (Security、Enjoyment、Excitement、Adventure、Autonomy、Discipline)```
 ### Empathy maps
 ![image](https://github.com/kevin20010808/term_SoftwareStudio_NTHU/assets/65552364/f6ab70cd-0506-42e5-83b3-aa1a3cc728ed)
+
 ! Maps for individual users (TA): Visualize and label a specific person in a condition.
 ![image](https://github.com/kevin20010808/term_SoftwareStudio_NTHU/assets/65552364/52504d4e-8123-46df-90a2-ed74dbb8af8a)
 ### User Journey Map
