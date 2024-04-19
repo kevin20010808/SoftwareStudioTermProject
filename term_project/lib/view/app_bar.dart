@@ -63,7 +63,7 @@ class _MyAppBarState extends State<MyAppBar> {
     });
     _pageController.jumpToPage(index);
     if (index == 1) {
-      Future.microtask(() => _showAddFoodModal(context));
+      // Future.microtask(() => _takePicture());
     } else if (index == 0) {
       // Handle other navigation items
       Future.microtask(() =>  const MyAppBar(body: Home()));
@@ -75,29 +75,29 @@ class _MyAppBarState extends State<MyAppBar> {
     
   }
 
-  Future<void> _showAddFoodModal(BuildContext context) async {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 100,
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ElevatedButton.icon(
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Take a Picture'),
-                onPressed: () {
-                  _takePicture();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // Future<void> _showAddFoodModal(BuildContext context) async {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Container(
+  //         height: 500,
+  //         padding: const EdgeInsets.all(20),
+  //         child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: <Widget>[
+  //             ElevatedButton.icon(
+  //               icon: const Icon(Icons.camera_alt),
+  //               label: const Text('Take a Picture'),
+  //               onPressed: () {
+  //                 _takePicture();
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> _takePicture() async {
   // Ensure the storage permission is granted
@@ -137,8 +137,10 @@ class _MyAppBarState extends State<MyAppBar> {
     // ignore: avoid_print
     print('Image saved at: ${savedImage.path}');
   }
-  if (!mounted) return;
-  Navigator.of(context).pop(); // Close the modal if it's open
+
+
+  // if (!mounted) return;
+  // Navigator.of(context).pop(); // Close the modal if it's open
 }
 
   @override
@@ -150,6 +152,9 @@ class _MyAppBarState extends State<MyAppBar> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
+          if (index == 1) {
+            Future.microtask(() => _takePicture());
+          }
           setState(() => _selectedIndex = index);
         },
         children: <Widget>[
