@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:term_project/widgets/app_bar.dart';
+import 'package:term_project/widgets/my_drawer.dart';
 
 
 class ProfileScreen extends StatelessWidget {
@@ -8,49 +10,56 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Center(
-            child: Container(
-              width: 120.0,
-              height: 120.0,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
-                shape: BoxShape.circle,
+    return Scaffold(
+      drawer:  const MyDrawer(),
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+      bottomNavigationBar: const MyAppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Center(
+              child: Container(
+                width: 120.0,
+                height: 120.0,
+                decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  shape: BoxShape.circle,
+                ),
+                // If you have an image, you can use the Image.network or Image.asset widget
+                child: const Icon(Icons.person, size: 60, color: Colors.white),
               ),
-              // If you have an image, you can use the Image.network or Image.asset widget
-              child: const Icon(Icons.person, size: 60, color: Colors.white),
             ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Username:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Text('XxNoobMaster69xX'),
-          const SizedBox(height: 16),
-          const Text(
-            'Age:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Text('69'),
-          const SizedBox(height: 16),
-          const Text(
-            'Height:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Text('169 cm'),
-          const SizedBox(height: 16),
-          const Text(
-            'Weight:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Text('169 kg'),
-        ],
+            const SizedBox(height: 24),
+            const Text(
+              'Username:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Text('XxNoobMaster69xX'),
+            const SizedBox(height: 16),
+            const Text(
+              'Age:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Text('69'),
+            const SizedBox(height: 16),
+            const Text(
+              'Height:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Text('169 cm'),
+            const SizedBox(height: 16),
+            const Text(
+              'Weight:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Text('169 kg'),
+          ],
+        ),
       ),
     );
   }

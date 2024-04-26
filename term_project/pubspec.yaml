@@ -31,6 +31,11 @@ dependencies:
   
   flutter:
     sdk: flutter
+  
+  
+  go_router: ^13.2.0
+
+
 
   path_provider: ^2.0.9 
   image_picker: ^0.8.5+3
