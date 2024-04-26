@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
+import 'package:term_project/widgets/recent_photo.dart';
 
 
 class Home extends StatelessWidget {
@@ -39,37 +40,19 @@ class Home extends StatelessWidget {
                 ],
               ),
             ),
-            
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text(
+                  Text(
                     'Your recent food data',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
                   SizedBox(
                     height: 200, // Fixed height for the scrolling area
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 4, // Number of items in your list
-                      itemBuilder: (context, index) {
-                        // Return a widget for your food data here, e.g., an image inside a card
-                        return Container(
-                          width: 160,
-                          margin: const EdgeInsets.only(right: 16), // Fixed width for each item
-                          child: Card(
-                            clipBehavior: Clip.antiAlias,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Image.asset('assets/food_$index.jpg'),
-                          ),
-                        );
-                      },
-                    ),
+                    child: RecentPhoto(),
                   ),
                 ],
               ),
@@ -98,3 +81,4 @@ class Home extends StatelessWidget {
     );
   }
 }
+

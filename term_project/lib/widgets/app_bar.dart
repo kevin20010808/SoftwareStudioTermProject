@@ -17,7 +17,8 @@ class _MyAppBarState extends State<MyAppBar> {
     });
 
     if (index == 1) {
-      takePicture();
+      // takePicture();
+      context.go('/list');
     } else if (index == 0) {
       // Handle other navigation items
       context.go('/');
@@ -33,7 +34,7 @@ class _MyAppBarState extends State<MyAppBar> {
       BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Foody'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'list'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         currentIndex: _selectedIndex,

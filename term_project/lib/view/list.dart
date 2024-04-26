@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 
@@ -22,10 +23,11 @@ class _ListScreenState extends State<ListScreen>{
       ),
       body: ListView.builder(
         itemCount: 10,
-        itemBuilder: (context, index) {
+        itemBuilder: (context, itemId) {
           return ListTile(
-            title: Text('Item $index'),
+            title: Text('Item $itemId'),
             onTap: () {
+              context.go('/list/$itemId');
               // Add your logic here
             },
           );
