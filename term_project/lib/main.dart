@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:term_project/services/providers/navbar_index_provider.dart';
 import 'services/routes.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_)=> BottomNavBarIndexProvider(),
+      child: const MyApp()
+    )
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

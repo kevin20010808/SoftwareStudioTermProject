@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:term_project/services/providers/navbar_index_provider.dart';
 
 
 class MyDrawer extends StatelessWidget {
@@ -7,33 +9,51 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomNavBarIndexProvider = Provider.of<BottomNavBarIndexProvider>(context, listen: false); 
+    
+    void onItemTapped(int index) {  
+      bottomNavBarIndexProvider.setIndex(index);
+      if (index == 1) {
+        context.go('/list');
+      } else if (index == 0) {
+        context.go('/');
+      } else if (index == 2) {
+        context.go('/profile');
+      }
+      Navigator.pop(context);
+    }
+
     return Drawer(
       child: ListView(
-        children: <Widget>[
+        children: [
           const UserAccountsDrawerHeader(
             accountName: Text('John Doe'),
-            accountEmail: Text(''),
+            accountEmail: Text('johndoe@example.com'),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(Icons.person),
             ),
           ),
-          ListTile(
-            title: const Text('Home'),
-            onTap: () {
-              context.go('/');
-            },
-          ),
-          ListTile(
-            title: const Text('Profile'),
-            onTap: () {
-              context.go('/profile');
-            },
-          ),
-          ListTile(
-            title: const Text('List'),
-            onTap: () {
-              context.go('/list');
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: 3,
+            itemBuilder: (BuildContext context, int index) { 
+              String title = '';
+              switch (index) {
+                case 0:
+                  title = 'Home';
+                  break;
+                case 2:
+                  title = 'Profile';
+                  break;
+                case 1:
+                  title = 'List';
+                  break;
+              }
+              return ListTile(
+                title: Text(title),
+                onTap: () => onItemTapped(index),
+              );
             },
           ),
         ],
