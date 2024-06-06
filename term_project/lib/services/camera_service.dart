@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:term_project/services/firebase_photo_service.dart';
 
 
  
@@ -44,6 +45,14 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
     // Save the image to the gallery
     await saveImageToGallery(savedImage);
     
+    FirebasePhotoService photoService = FirebasePhotoService();
+    String? photoUrl = await photoService.uploadPhoto(imageFile);
+    if (photoUrl != null) {
+      print('Photo uploaded and available at: $photoUrl');
+    } else {
+      print('Failed to upload photo.');
+    }
+
     // ignore: avoid_print
     print('Image saved at: ${savedImage.path}');
   }
