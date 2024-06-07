@@ -9,7 +9,7 @@ import 'package:term_project/services/firebase_photo_service.dart';
 
 
  
- Future<void> takePicture() async {
+Future<void> takePicture() async {
   // Ensure the storage permission is granted
   if (!await _requestStoragePermission()) {
     // Handle the case where the user does not grant permission
@@ -43,13 +43,17 @@ import 'package:term_project/services/firebase_photo_service.dart';
     final File savedImage = await imageFile.copy(savedImagePath);
 
     // Save the image to the gallery
+    
     await saveImageToGallery(savedImage);
+    
     
     FirebasePhotoService photoService = FirebasePhotoService();
     String? photoUrl = await photoService.uploadPhoto(imageFile);
     if (photoUrl != null) {
+      // ignore: avoid_print
       print('Photo uploaded and available at: $photoUrl');
     } else {
+      // ignore: avoid_print
       print('Failed to upload photo.');
     }
 
@@ -60,20 +64,19 @@ import 'package:term_project/services/firebase_photo_service.dart';
 }
 
 Future<void> saveImageToGallery(File file) async {
-  final ImagePicker picker = ImagePicker();
-  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-  if (image != null) {
-    final File imageFile = File(image.path);
-
-    if (await _requestStoragePermission()) {
-      final String fileName = path.basename(imageFile.path);
-      final Uint8List bytes = await imageFile.readAsBytes();
-      final result = await ImageGallerySaver.saveImage(bytes, name: fileName);
-      // ignore: avoid_print
-      print('Image saved to Gallery: $result');
-    }
+   
+  final bool storagePermission = await _requestStoragePermission();
+  if (storagePermission) {
+    final String fileName = path.basename(file.path);
+    final Uint8List bytes = await file.readAsBytes();
+    final result = await ImageGallerySaver.saveImage(bytes, name: fileName);
+    // ignore: avoid_print
+    print('Image saved to Gallery: $result');
+  } else {
+    // ignore: avoid_print
+    print('Storage permission not granted');
   }
+
 }
 
 Future<bool> _requestStoragePermission() async {

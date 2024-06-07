@@ -42,12 +42,12 @@ dependencies:
   firebase_messaging: ^14.9.2
   cloud_firestore: ^4.15.7
   flutter_native_splash: ^2.3.10
-  image_picker: ^1.1.1
+  image_picker: ^0.8.5+3
   flutter_svg: ^2.0.10+1
   cloud_functions: ^4.7.5
   universal_html: ^2.2.4
-
-  path_provider: ^2.0.9 
+  path: ^1.9.0
+  path_provider: ^2.0.11
   permission_handler: ^11.3.1
   image_gallery_saver: ^2.0.3
 
