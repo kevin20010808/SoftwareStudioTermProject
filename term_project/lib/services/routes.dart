@@ -25,15 +25,16 @@ final GoRouter router = GoRouter(
           path: 'list', 
           builder: (context, state) => const ListScreen(),
           routes: <RouteBase>[
+            GoRoute(path: 'result', 
+              builder: (context, state) => const DisplayPhotoPage()
+            ),
             GoRoute(
               path: ':itemId',
               builder: (context, state) =>  ItemScreen(itemId: state.pathParameters['itemId']!)
             ),
           ],
         ),
-        GoRoute(path: 'result', 
-          builder: (context, state) => const DisplayPhotoPage()
-        ),
+
       ]
     ),
     

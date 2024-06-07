@@ -16,12 +16,11 @@ class MyAppBar extends StatelessWidget {
     void onItemTapped(int index) {  
       bottomNavBarIndexProvider.setIndex(index);
       
-      if (index == 1) {
-        // takePicture();
-        context.go('/list');
-      } else if (index == 0) {
-        // Handle other navigation items
+      if (index == 0) {
         context.go('/home');
+      } else if (index == 1) {
+        // Handle other navigation items
+        context.go('/list');
       } else if (index == 2) {
         // Handle other navigation items
         context.go('/profile');
@@ -31,7 +30,8 @@ class MyAppBar extends StatelessWidget {
 
     return 
       BottomNavigationBar(
-        currentIndex: bottomNavBarIndexProvider.selectedIndex,
+        //if bottomNavBarIndexProvider.selectedIndex<=3 then currentIndex is bottomNavBarIndexProvider.selectedIndex else currentIndex is 0
+        currentIndex: bottomNavBarIndexProvider.selectedIndex<3?bottomNavBarIndexProvider.selectedIndex:0,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'list'),

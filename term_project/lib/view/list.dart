@@ -34,14 +34,17 @@ class _ListScreenState extends State<ListScreen> {
               onTap: () async {
                 String? url = await _cameraService.takePicture(context);
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   Provider.of<ImagesProvider>(context, listen: false).setImageUrl(url);
                   if (mounted) {
-                    context.go('/result'); // 确保 '/result' 路径已在 GoRouter 中正确配置
+                    // ignore: use_build_context_synchronously
+                    context.go('/list/result'); // 确保 '/result' 路径已在 GoRouter 中正确配置
                   }
                 } else {
                   if (mounted) {
+                    // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: const Text('Failed to take or upload picture')),
+                      const SnackBar(content: Text('Failed to take or upload picture')),
                     );
                   }
                 }
