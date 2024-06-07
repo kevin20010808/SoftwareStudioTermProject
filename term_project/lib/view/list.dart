@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:term_project/services/camera_service.dart';
+import 'package:term_project/services/providers/image_provider.dart';
 import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
+import 'package:provider/provider.dart';
+
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -11,8 +14,8 @@ class ListScreen extends StatefulWidget {
   State<ListScreen> createState() => _ListScreenState();
 }
 
-class _ListScreenState extends State<ListScreen>{
-
+class _ListScreenState extends State<ListScreen> {
+  final CameraService _cameraService = CameraService();
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +31,22 @@ class _ListScreenState extends State<ListScreen>{
             height: 100,
             width: 300,
             child: InkWell(
-              onTap: () => takePicture(),
-              child:  const Card(
+              onTap: () async {
+                String? url = await _cameraService.takePicture(context);
+                if (mounted) {
+                  Provider.of<ImagesProvider>(context, listen: false).setImageUrl(url);
+                  if (mounted) {
+                    context.go('/result'); // 确保 '/result' 路径已在 GoRouter 中正确配置
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: const Text('Failed to take or upload picture')),
+                    );
+                  }
+                }
+              },
+              child: const Card(
                 color: Color.fromARGB(232, 2, 95, 64),
                 child: Center(
                   child: Text(
@@ -48,7 +65,6 @@ class _ListScreenState extends State<ListScreen>{
                   title: Text('Item $itemId'),
                   onTap: () {
                     context.go('/list/$itemId');
-                    // Add your logic here
                   },
                 );
               },
@@ -58,5 +74,4 @@ class _ListScreenState extends State<ListScreen>{
       ),
     );
   }
-
 }

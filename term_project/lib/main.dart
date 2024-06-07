@@ -3,15 +3,21 @@ import 'package:term_project/services/providers/navbar_index_provider.dart';
 import 'services/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:term_project/services/providers/image_provider.dart';
+
+
 
 void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
-    ChangeNotifierProvider(
-      create: (_)=> BottomNavBarIndexProvider(),
-      child: const MyApp()
+    MultiProvider(providers: 
+    [
+      ChangeNotifierProvider(create: (_)=> ImagesProvider()),
+      ChangeNotifierProvider(create: (_)=> BottomNavBarIndexProvider())
+    ],
+    child: const MyApp()
     )
   );
 }

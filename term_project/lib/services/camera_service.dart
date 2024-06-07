@@ -1,21 +1,24 @@
  import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:provider/provider.dart';
 import 'package:term_project/services/firebase_photo_service.dart';
-
-
+import 'package:term_project/services/providers/image_provider.dart';
  
-Future<void> takePicture() async {
+class CameraService{
+
+Future<String> takePicture(BuildContext context) async {
   // Ensure the storage permission is granted
   if (!await _requestStoragePermission()) {
     // Handle the case where the user does not grant permission
     // ignore: avoid_print
     print('Storage permission not granted');
-    return;
+    return '';
   }
 
   final ImagePicker picker = ImagePicker();
@@ -52,14 +55,16 @@ Future<void> takePicture() async {
     if (photoUrl != null) {
       // ignore: avoid_print
       print('Photo uploaded and available at: $photoUrl');
+      // ignore: avoid_print
+      print('Image saved at: ${savedImage.path}');
+      Provider.of<ImagesProvider>(context, listen: false).setImageUrl(photoUrl);
+      return photoUrl;
     } else {
       // ignore: avoid_print
       print('Failed to upload photo.');
-    }
-
-    // ignore: avoid_print
-    print('Image saved at: ${savedImage.path}');
+    } 
   }
+  return '';
 
 }
 
@@ -87,4 +92,10 @@ Future<bool> _requestStoragePermission() async {
   var status = await Permission.manageExternalStorage.status;
 
   return status.isGranted;
+}
+
+
+
+
+
 }

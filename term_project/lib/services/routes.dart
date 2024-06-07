@@ -4,6 +4,8 @@ import 'package:term_project/view/profile.dart';
 import 'package:term_project/view/list.dart';
 import 'package:term_project/view/item_detail.dart';
 import 'package:term_project/view/login_page.dart';
+import 'package:term_project/view/result_page.dart';
+
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
@@ -28,6 +30,9 @@ final GoRouter router = GoRouter(
               builder: (context, state) =>  ItemScreen(itemId: state.pathParameters['itemId']!)
             ),
           ],
+        ),
+        GoRoute(path: 'result', 
+          builder: (context, state) => const DisplayPhotoPage()
         ),
       ]
     ),
