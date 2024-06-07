@@ -21,7 +21,7 @@ class MyAppBar extends StatelessWidget {
         context.go('/list');
       } else if (index == 0) {
         // Handle other navigation items
-        context.go('/');
+        context.go('/home');
       } else if (index == 2) {
         // Handle other navigation items
         context.go('/profile');

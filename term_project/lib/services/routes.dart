@@ -3,13 +3,18 @@ import 'package:term_project/view/home.dart';
 import 'package:term_project/view/profile.dart';
 import 'package:term_project/view/list.dart';
 import 'package:term_project/view/item_detail.dart';
+import 'package:term_project/view/login_page.dart';
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
       path: '/',
-      builder: (context, state) => const Home(),
+      builder: (context, state) => const LoginPage(),
       routes: <RouteBase>[
+        GoRoute(
+          path: 'home',
+          builder: (context, state) => const Home(),
+        ),
         GoRoute(
           path:  'profile',
           builder: (context, state) => const ProfileScreen(),
