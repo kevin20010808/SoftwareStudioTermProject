@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:term_project/models/my_record.dart';
 import 'package:term_project/services/camera_service.dart';
+import 'package:term_project/services/firestore_service.dart';
 import 'package:term_project/services/providers/image_provider.dart';
 import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:provider/provider.dart';
-
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -16,6 +17,18 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   final CameraService _cameraService = CameraService();
+  List<MyRecord> records = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecords();
+  }
+
+  Future<void> _loadRecords() async {
+    records = await FirebaseService.instance.loadAllRecords();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,21 +45,17 @@ class _ListScreenState extends State<ListScreen> {
             width: 300,
             child: InkWell(
               onTap: () async {
-                String? url = await _cameraService.takePicture(context);
-                if (mounted) {
-                  // ignore: use_build_context_synchronously
-                  Provider.of<ImagesProvider>(context, listen: false).setImageUrl(url);
+                MyRecord? newRecord = await _cameraService.takePicture(context);
+                if (newRecord != null && mounted) {
+                  _loadRecords();  // Reload records to include the new one
                   if (mounted) {
-                    // ignore: use_build_context_synchronously
-                    context.go('/list/result'); // 确保 '/result' 路径已在 GoRouter 中正确配置
+                    Provider.of<ImagesProvider>(context, listen: false).setImageUrl(newRecord.foodImage);
+                    context.go('/list/${newRecord.id}'); 
                   }
-                } else {
-                  if (mounted) {
-                    // ignore: use_build_context_synchronously
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Failed to take or upload picture')),
-                    );
-                  }
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to take or upload picture')),
+                  );
                 }
               },
               child: const Card(
@@ -62,12 +71,12 @@ class _ListScreenState extends State<ListScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: 20,
-              itemBuilder: (context, itemId) {
+              itemCount: records.length,
+              itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('Item $itemId'),
+                  title: Text('Item ${records[index].id}'),
                   onTap: () {
-                    context.go('/list/$itemId');
+                    context.go('/list/${records[index].id}');
                   },
                 );
               },

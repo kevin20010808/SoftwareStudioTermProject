@@ -30,7 +30,7 @@ final GoRouter router = GoRouter(
             ),
             GoRoute(
               path: ':itemId',
-              builder: (context, state) =>  ItemScreen(itemId: state.pathParameters['itemId']!)
+              builder: (context, state) =>  ItemDetailScreen(itemId: state.pathParameters['itemId']!)
             ),
           ],
         ),
