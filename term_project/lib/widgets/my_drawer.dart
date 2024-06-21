@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/navbar_index_provider.dart';
 
-
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
@@ -42,7 +41,31 @@ class MyDrawer extends StatelessWidget {
           ListView.builder(
             shrinkWrap: true,
             itemCount: 4,
-            itemBuilder: (BuildContext context, int index) { 
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 3) {
+                return Column(
+                  children: [
+                    Row(
+                      children: const [
+                        //Spacer(flex: 1), // Add space before the divider
+                        Expanded(
+                          flex: 6, // Adjust the flex value to control the width of the divider
+                          child: Divider(),
+                        ),
+                        Spacer(flex: 1), // Add space after the divider
+                      ],
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Logout',
+                        style: TextStyle(color: Colors.red), // Set the text color to red
+                      ),
+                      onTap: () => onItemTapped(index),
+                    ),
+                  ],
+                );
+              }
+
               String title = '';
               switch (index) {
                 case 0:
@@ -53,9 +76,6 @@ class MyDrawer extends StatelessWidget {
                   break;
                 case 2:
                   title = 'Profile';
-                  break;
-                case 3:
-                  title = 'Logout';
                   break;
               }
               return ListTile(
