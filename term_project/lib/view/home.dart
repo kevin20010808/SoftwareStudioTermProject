@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:term_project/widgets/recent_photo.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -18,13 +20,13 @@ class Home extends StatelessWidget {
       body: Column(
           children: <Widget>[
             // User Greeting
-            const Padding(
-              padding: EdgeInsets.all(16.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Hi, XXNoobMei...',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  user?.displayName == null ? 'Hello!' : 'Hello, ${user?.displayName}!',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

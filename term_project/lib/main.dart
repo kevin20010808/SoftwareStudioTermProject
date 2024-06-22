@@ -4,7 +4,7 @@ import 'services/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:term_project/services/providers/image_provider.dart';
-
+import 'package:term_project/services/providers/profile_provider.dart';
 
 
 void main() async{
@@ -15,7 +15,8 @@ void main() async{
     MultiProvider(providers: 
     [
       ChangeNotifierProvider(create: (_)=> ImagesProvider()),
-      ChangeNotifierProvider(create: (_)=> BottomNavBarIndexProvider())
+      ChangeNotifierProvider(create: (_)=> BottomNavBarIndexProvider()),
+      ChangeNotifierProvider(create: (_) => ProfileProvider()),
     ],
     child: const MyApp()
     )

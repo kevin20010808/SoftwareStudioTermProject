@@ -1,18 +1,18 @@
 import 'dart:math';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/navbar_index_provider.dart';
-
-
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final bottomNavBarIndexProvider = Provider.of<BottomNavBarIndexProvider>(context, listen: false); 
-    
+    User? user = FirebaseAuth.instance.currentUser;
+
     void onItemTapped(int index) {  
       bottomNavBarIndexProvider.setIndex(index);
       if (index == 0) {
@@ -30,11 +30,12 @@ class MyDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          const UserAccountsDrawerHeader(
-            decoration: BoxDecoration(color: Color.fromARGB(232, 2, 95, 64)),
-            accountName: Text('John Doe'),
-            accountEmail: Text('johndoe@example.com'),
-            currentAccountPicture: CircleAvatar(
+           UserAccountsDrawerHeader(
+            decoration: const BoxDecoration(color: Color.fromARGB(232, 2, 95, 64)),
+            //users name and email should be fetched from the database
+            accountName: Text(user?.displayName ?? ''),
+            accountEmail: Text(user?.email ?? ''),
+            currentAccountPicture: const CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(Icons.person),
             ),
@@ -42,7 +43,30 @@ class MyDrawer extends StatelessWidget {
           ListView.builder(
             shrinkWrap: true,
             itemCount: 4,
-            itemBuilder: (BuildContext context, int index) { 
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 3) {
+                return Column(
+                  children: [
+                    const Row(
+                      children: [
+                        Expanded(
+                          flex: 6, 
+                          child: Divider(),
+                        ),
+                        Spacer(flex: 1), 
+                      ],
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Logout',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onTap: () => onItemTapped(index),
+                    ),
+                  ],
+                );
+              }
+
               String title = '';
               switch (index) {
                 case 0:
@@ -53,9 +77,6 @@ class MyDrawer extends StatelessWidget {
                   break;
                 case 2:
                   title = 'Profile';
-                  break;
-                case 3:
-                  title = 'Logout';
                   break;
               }
               return ListTile(
