@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'package:term_project/models/my_user.dart';
+import 'package:term_project/services/providers/user_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,10 +35,12 @@ class LoginPageState extends State<LoginPage> {
       );
       await _firestore.collection('users').doc(newUser.id).set(newUser.toMap());
 
+      Provider.of<UserProvider>(context, listen: false).setUser(userCredential.user);
+      await Provider.of<UserProvider>(context, listen: false).fetchUserData();
+
       setState(() {
-        
         _message = 'Successfully registered: ${newUser.email}';
-        
+        context.go('/home');
       });
     } catch (e) {
       setState(() {
@@ -51,6 +55,9 @@ class LoginPageState extends State<LoginPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+
+      Provider.of<UserProvider>(context, listen: false).setUser(userCredential.user);
+      await Provider.of<UserProvider>(context, listen: false).fetchUserData();
 
       setState(() {
         _message = 'Successfully logged in: ${userCredential.user?.email}';
@@ -83,11 +90,12 @@ class LoginPageState extends State<LoginPage> {
       );
       await _firestore.collection('users').doc(newUser.id).set(newUser.toMap());
 
+      Provider.of<UserProvider>(context, listen: false).setUser(userCredential.user);
+      await Provider.of<UserProvider>(context, listen: false).fetchUserData();
+
       setState(() {
         _message = 'Successfully logged in with Google: ${newUser.email}';
-        
         context.go('/home');
-
       });
     } catch (e) {
       setState(() {
@@ -100,7 +108,7 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login Page'),
+        title: const Text('Login Page'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -108,32 +116,32 @@ class LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: const InputDecoration(labelText: 'Username'),
             ),
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _register,
-              child: Text('Register'),
+              child: const Text('Register'),
             ),
             ElevatedButton(
               onPressed: _login,
-              child: Text('Login'),
+              child: const Text('Login'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _loginWithGoogle,
-              child: Text('Login with Google'),
+              child: const Text('Login with Google'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(_message),
           ],
         ),

@@ -5,8 +5,7 @@ import 'package:term_project/view/list.dart';
 import 'package:term_project/view/item_detail.dart';
 import 'package:term_project/view/login_page.dart';
 import 'package:term_project/view/result_page.dart';
-
-
+import 'package:term_project/widgets/error_screen.dart';
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
     GoRoute(
@@ -18,25 +17,30 @@ final GoRouter router = GoRouter(
           builder: (context, state) => const Home(),
         ),
         GoRoute(
-          path:  'profile',
+          path: 'profile',
           builder: (context, state) => const ProfileScreen(),
         ),
         GoRoute(
-          path: 'list', 
+          path: 'list',
           builder: (context, state) => const ListScreen(),
           routes: <RouteBase>[
-            GoRoute(path: 'result', 
-              builder: (context, state) => const DisplayPhotoPage()
+            GoRoute(
+              path: 'result',
+              builder: (context, state) => const DisplayPhotoPage(),
             ),
             GoRoute(
               path: ':itemId',
-              builder: (context, state) =>  ItemDetailScreen(itemId: state.pathParameters['itemId']!)
+              builder: (context, state) {
+                final itemId = state.pathParameters['itemId'];
+                if (itemId == null) {
+                  return const ErrorScreen(); // Handle the case where itemId is null
+                }
+                return ItemDetailScreen(itemId: itemId);
+              },
             ),
           ],
         ),
-
-      ]
+      ],
     ),
-    
-  ]
+  ],
 );

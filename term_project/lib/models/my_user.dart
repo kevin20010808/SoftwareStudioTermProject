@@ -17,7 +17,7 @@ class MyUser {
     };
   }
 
-  factory MyUser.fromMap(Map<String, dynamic> map) {
+  static MyUser fromMap(Map<String, dynamic> map) {
     return MyUser(
       id: map['id'],
       username: map['username'],
