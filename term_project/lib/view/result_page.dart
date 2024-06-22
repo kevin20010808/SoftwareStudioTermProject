@@ -14,7 +14,7 @@ class DisplayPhotoPage extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         // Update the BottomNavBarIndexProvider before navigating back
-        Provider.of<BottomNavBarIndexProvider>(context).setIndex(1);
+        Provider.of<BottomNavBarIndexProvider>(context, listen: false).setIndex(1);
         // Navigate back to the list screen
         context.go('/main');
         return false; // Prevent the default back button behavior

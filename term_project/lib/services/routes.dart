@@ -21,10 +21,6 @@ final GoRouter router = GoRouter(routes: <RouteBase>[
             builder: (context, state) => const ProfileScreen(),
           ),
           GoRoute(
-            path: 'profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-          GoRoute(
             path: 'list',
             builder: (context, state) => const ListScreen(),
             routes: <RouteBase>[

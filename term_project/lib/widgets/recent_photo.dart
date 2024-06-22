@@ -101,7 +101,7 @@ class _RecentPhotoState extends State<RecentPhoto> {
               child: ElevatedButton(
                 onPressed: () {
                   // Update the BottomNavBarIndexProvider before navigating
-                  Provider.of<BottomNavBarIndexProvider>(context).setIndex(1);
+                  Provider.of<BottomNavBarIndexProvider>(context, listen: false).setIndex(1);
                   context.go('/main');
                 },
                 child: const Text('See All'),

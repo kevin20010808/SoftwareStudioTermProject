@@ -14,6 +14,7 @@ class MyAppBar extends StatelessWidget {
 
     void onItemTapped(int index) {
       bottomNavBarIndexProvider.setIndex(index);
+            //Navigator.pop(context);
     }
 
     return CurvedNavigationBar(
@@ -23,7 +24,7 @@ class MyAppBar extends StatelessWidget {
         Icon(Icons.book, size: 30, color: Colors.white,),
         Icon(Icons.person, size: 30, color: Colors.white,),
       ],
-      onTap: onItemTapped,
+      onTap: onItemTapped, 
       backgroundColor: Colors.transparent,
       color: Colors.green,
     );

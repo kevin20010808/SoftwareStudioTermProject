@@ -26,6 +26,7 @@ class MyDrawer extends StatelessWidget {
         context.go('/main');
       } else if (index == 3) {
         context.go('/');
+        bottomNavBarIndexProvider.setIndex(0);
       }
       Navigator.pop(context);
       

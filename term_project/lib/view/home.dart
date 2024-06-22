@@ -31,67 +31,79 @@ class _HomeState extends State<Home> {
         title: const Text('Home'),
       ),
       drawer: const MyDrawer(),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            // Green Background Box with Calories and Goals
-            ClipPath(
-              clipper: CurvedBottomClipper(),
-              child: Container(
-                height: 370,
-                color: Colors.green[200], // Green background color
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const SizedBox(height: 40),
-                    Text(
-                      'Calories Left',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background.jpg'), // Replace with your image path
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                // Green Background Box with Calories and Goals
+                ClipPath(
+                  clipper: CurvedBottomClipper(),
+                  child: Container(
+                    height: 370,
+                    color: Colors.green[200]?.withOpacity(1), // Green background color with opacity
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        const SizedBox(height: 40),
+                        Text(
+                          'Calories Left',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '${_caloriesLimit - _totalCalories}',
+                          style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.orange),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'of $_caloriesLimit kcal',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              _buildCircularProgressIndicator(dailyGoalPercentage, 'Daily goal'),
+                              _buildCircularProgressIndicator(monthlyGoalPercentage, 'Monthly goal'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${_caloriesLimit - _totalCalories}',
-                      style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.orange),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'of $_caloriesLimit kcal',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          _buildCircularProgressIndicator(dailyGoalPercentage, 'Daily goal'),
-                          _buildCircularProgressIndicator(monthlyGoalPercentage, 'Monthly goal'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text(
-                    'Your recent food data',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        'Your recent food data',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      RecentPhoto(
+                        onCaloriesChanged: _onCaloriesChanged,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  RecentPhoto(
-                    onCaloriesChanged: _onCaloriesChanged,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
