@@ -12,7 +12,7 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomNavBarIndexProvider =
-        Provider.of<BottomNavBarIndexProvider>(context, listen: false);
+        Provider.of<BottomNavBarIndexProvider>(context);
     User? user = FirebaseAuth.instance.currentUser;
 
     void onItemTapped(int index) {
@@ -31,7 +31,7 @@ class MyDrawer extends StatelessWidget {
       
     }
 
-return Drawer(
+    return Drawer(
       child: ListView(
         children: [
           UserAccountsDrawerHeader(

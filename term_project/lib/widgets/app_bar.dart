@@ -10,16 +10,14 @@ class MyAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomNavBarIndexProvider =
-        Provider.of<BottomNavBarIndexProvider>(context, listen: false);
+        Provider.of<BottomNavBarIndexProvider>(context);
 
     void onItemTapped(int index) {
       bottomNavBarIndexProvider.setIndex(index);
     }
 
     return CurvedNavigationBar(
-      index: bottomNavBarIndexProvider.selectedIndex < 5
-          ? bottomNavBarIndexProvider.selectedIndex
-          : 0,
+      index: bottomNavBarIndexProvider.selectedIndex,
       items: const <Widget>[
         Icon(Icons.home, size: 30, color: Colors.white,),
         Icon(Icons.book, size: 30, color: Colors.white,),
