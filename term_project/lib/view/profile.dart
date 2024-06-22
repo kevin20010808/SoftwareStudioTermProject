@@ -1,29 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:term_project/models/my_user.dart';
 import 'package:term_project/widgets/my_drawer.dart';
-import 'package:term_project/updater/profile_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback refreshCallback;
+
+  const ProfileScreen({Key? key, required this.refreshCallback}) : super(key: key);
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  User? user = FirebaseAuth.instance.currentUser;
+  MyUser? myUser;
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _ageController = TextEditingController();
+  TextEditingController _weightController = TextEditingController();
+  TextEditingController _heightController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    Provider.of<ProfileProvider>(context, listen: false).loadProfileData();
+    if (user != null) {
+      _fetchUserData();
+    }
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+
+      if (snapshot.exists) {
+        setState(() {
+          myUser = MyUser.fromMap(snapshot.data()!);
+          _usernameController.text = myUser!.username;
+          _ageController.text = myUser!.age?.toString() ?? '';
+          _weightController.text = myUser!.weight?.toString() ?? '';
+          _heightController.text = myUser!.height?.toString() ?? '';
+        });
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
   }
 
   void _editProfile() {
-    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-    String? newUsername = profileProvider.username;
-    int? newAge = profileProvider.age;
-    double? newHeight = profileProvider.height;
-    double? newWeight = profileProvider.weight;
-
     showDialog(
       context: context,
       builder: (context) {
@@ -33,27 +61,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ListBody(
               children: [
                 TextField(
+                  controller: _usernameController,
                   decoration: const InputDecoration(labelText: 'Username'),
-                  controller: TextEditingController(text: profileProvider.username),
-                  onChanged: (value) => newUsername = value,
                 ),
                 TextField(
+                  controller: _ageController,
                   decoration: const InputDecoration(labelText: 'Age'),
                   keyboardType: TextInputType.number,
-                  controller: TextEditingController(text: profileProvider.age.toString()),
-                  onChanged: (value) => newAge = int.tryParse(value),
                 ),
                 TextField(
+                  controller: _heightController,
                   decoration: const InputDecoration(labelText: 'Height (cm)'),
                   keyboardType: TextInputType.number,
-                  controller: TextEditingController(text: profileProvider.height.toString()),
-                  onChanged: (value) => newHeight = double.tryParse(value),
                 ),
                 TextField(
+                  controller: _weightController,
                   decoration: const InputDecoration(labelText: 'Weight (kg)'),
                   keyboardType: TextInputType.number,
-                  controller: TextEditingController(text: profileProvider.weight.toString()),
-                  onChanged: (value) => newWeight = double.tryParse(value),
                 ),
               ],
             ),
@@ -67,15 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (newUsername != null && newAge != null && newHeight != null && newWeight != null) {
-                  profileProvider.updateProfile(
-                    username: newUsername!,
-                    age: newAge!,
-                    height: newHeight!,
-                    weight: newWeight!,
-                  );
-                  profileProvider.saveProfileData();
-                }
+                _updateProfile();
                 Navigator.of(context).pop();
               },
               child: const Text('Save'),
@@ -86,70 +102,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 18),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
+  void _updateProfile() async {
+    try {
+      // Update local MyUser object with new data
+      myUser = MyUser(
+        id: myUser!.id,
+        username: _usernameController.text,
+        email: myUser!.email,
+        age: int.tryParse(_ageController.text),
+        weight: double.tryParse(_weightController.text),
+        height: double.tryParse(_heightController.text),
+      );
+
+      // Update Firestore document with new data
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(myUser!.id)
+          .update(myUser!.toMap());
+
+      setState(() {
+        // Update local state with new user data
+        _usernameController.text = myUser!.username;
+        _ageController.text = myUser!.age?.toString() ?? '';
+        _weightController.text = myUser!.weight?.toString() ?? '';
+        _heightController.text = myUser!.height?.toString() ?? '';
+      });
+
+      // Refresh the MainScreen
+      widget.refreshCallback();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
+    } catch (e) {
+      print('Error updating profile: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final profileProvider = Provider.of<ProfileProvider>(context);
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       drawer: const MyDrawer(),
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: widget.refreshCallback,
+          ),
+        ],
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
+          // Background image container
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/background.jpg'), // Replace with your image path
+                image: AssetImage('assets/background.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
           SingleChildScrollView(
-            padding: const EdgeInsets.only(top: kToolbarHeight + 16.0, left: 16.0, right: 16.0, bottom: 16.0),
+            padding: const EdgeInsets.only(
+              top: kToolbarHeight + 45.0,
+              left: 16.0,
+              right: 16.0,
+              bottom: 16.0,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: LinearGradient(
+                      gradient: const LinearGradient(
                         colors: [Colors.green, Colors.lightGreen],
                       ),
                     ),
@@ -179,10 +205,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildProfileItem('Username:', profileProvider.username),
-                _buildProfileItem('Age:', profileProvider.age.toString()),
-                _buildProfileItem('Height:', '${profileProvider.height} cm'),
-                _buildProfileItem('Weight:', '${profileProvider.weight} kg'),
+                _buildProfileItem('Username:', _usernameController.text),
+                _buildProfileItem('Email:', myUser?.email ?? 'N/A'),
+                _buildProfileItem('Age:', _ageController.text),
+                _buildProfileItem('Height:', '${_heightController.text} cm'),
+                _buildProfileItem('Weight:', '${_weightController.text} kg'),
                 const SizedBox(height: 50),
               ],
             ),
@@ -218,6 +245,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProfileItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.grey,
+                  spreadRadius: 1,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

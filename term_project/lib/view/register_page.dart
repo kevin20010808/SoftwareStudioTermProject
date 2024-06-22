@@ -16,7 +16,13 @@ class RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
   String _message = '';
+
+  // Variable to store the current user data
+  MyUser? currentUser;
 
   Future<void> _register() async {
     try {
@@ -25,16 +31,26 @@ class RegisterPageState extends State<RegisterPage> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+
       MyUser newUser = MyUser(
         id: userCredential.user!.uid,
         username: _usernameController.text,
         email: _emailController.text,
+        age: int.tryParse(_ageController.text), // Nullable int
+        weight: double.tryParse(_weightController.text), // Nullable double
+        height: double.tryParse(_heightController.text), // Nullable double
       );
+
       await _firestore.collection('users').doc(newUser.id).set(newUser.toMap());
 
+      // Update the current user data
       setState(() {
+        currentUser = newUser;
         _message = 'Successfully registered: ${newUser.email}';
       });
+
+      // Debug print statement to verify the data
+      print('New user data: ${currentUser?.toMap()}');
 
       // Navigate back to the login page
       Navigator.pop(context);
@@ -48,12 +64,11 @@ class RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Prevents wallpaper from moving
+      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-                "assets/background.jpg"), // Replace with your own image path
+            image: AssetImage("assets/background.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -62,7 +77,6 @@ class RegisterPageState extends State<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: Create an Account
               Text(
                 'Create an Account',
                 style: TextStyle(
@@ -71,8 +85,6 @@ class RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               SizedBox(height: 8),
-
-              // Subtitle: Welcome! Please enter your details.
               Text(
                 'Welcome! Please enter your details.',
                 style: TextStyle(
@@ -81,22 +93,12 @@ class RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               SizedBox(height: 20),
-
-              // TextFields for Username, Email, and Password
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide(color: Colors.blue),
                   ),
                 ),
               ),
@@ -108,14 +110,6 @@ class RegisterPageState extends State<RegisterPage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -126,16 +120,41 @@ class RegisterPageState extends State<RegisterPage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
                 ),
                 obscureText: true,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _ageController,
+                decoration: InputDecoration(
+                  labelText: 'Age',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _weightController,
+                decoration: InputDecoration(
+                  labelText: 'Weight',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _heightController,
+                decoration: InputDecoration(
+                  labelText: 'Height',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
               ),
               SizedBox(height: 20),
               SizedBox(
@@ -156,8 +175,6 @@ class RegisterPageState extends State<RegisterPage> {
               SizedBox(height: 20),
               Text(_message),
               SizedBox(height: 20),
-
-              // Centered TextButton for navigating back to login page
               Center(
                 child: TextButton(
                   onPressed: () {

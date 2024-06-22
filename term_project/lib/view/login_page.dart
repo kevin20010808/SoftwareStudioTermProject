@@ -63,7 +63,7 @@ class LoginPageState extends State<LoginPage> {
       setState(() {
         _message = 'Successfully logged in with Google: ${newUser.email}';
 
-        context.go('/home');
+        context.go('/main');
       });
     } catch (e) {
       setState(() {
@@ -75,8 +75,7 @@ class LoginPageState extends State<LoginPage> {
   void _navigateToRegisterPage(BuildContext context) {
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const RegisterPage(),
+        pageBuilder: (context, animation, secondaryAnimation) => RegisterPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;

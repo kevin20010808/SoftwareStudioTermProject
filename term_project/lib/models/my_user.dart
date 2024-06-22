@@ -1,12 +1,18 @@
 class MyUser {
-  final String id;
-  final String username;
-  final String email;
+  String id;
+  String username;
+  String email;
+  int? age;
+  double? weight;
+  double? height;
 
   MyUser({
     required this.id,
     required this.username,
     required this.email,
+    this.age,
+    this.weight,
+    this.height,
   });
 
   Map<String, dynamic> toMap() {
@@ -14,6 +20,9 @@ class MyUser {
       'id': id,
       'username': username,
       'email': email,
+      'age': age,
+      'weight': weight,
+      'height': height,
     };
   }
 
@@ -22,6 +31,9 @@ class MyUser {
       id: map['id'],
       username: map['username'],
       email: map['email'],
+      age: map['age'],
+      weight: map['weight'],
+      height: map['height'],
     );
   }
 }

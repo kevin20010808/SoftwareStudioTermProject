@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:term_project/services/providers/image_provider.dart';
 import 'package:term_project/updater/profile_provider.dart';
+import 'package:term_project/services/providers/refresh_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() async {
     ChangeNotifierProvider(create: (_) => ImagesProvider()),
     ChangeNotifierProvider(create: (_) => BottomNavBarIndexProvider()),
     ChangeNotifierProvider(create: (_) => ProfileProvider()),
+    ChangeNotifierProvider(create: (_) => RefreshProvider()),
   ], child: const MyApp()));
 }
 

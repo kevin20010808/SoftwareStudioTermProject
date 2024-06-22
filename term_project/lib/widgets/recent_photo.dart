@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:term_project/services/providers/navbar_index_provider.dart';
 
 class RecentPhoto extends StatefulWidget {
@@ -31,17 +31,13 @@ class _RecentPhotoState extends State<RecentPhoto> {
     widget.onCaloriesChanged(totalCalories);
   }
 
-  String _formatTitle(String title) {
-    return title;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: _foodItems.length > 4 ? 4 : _foodItems.length,
           itemBuilder: (context, index) {
             final foodItem = _foodItems[index];
@@ -55,7 +51,7 @@ class _RecentPhotoState extends State<RecentPhoto> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _formatTitle(foodItem['title']),
+                          foodItem['title'],
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
