@@ -50,7 +50,7 @@ class RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false, // Prevents wallpaper from moving
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
                 "assets/background.jpg"), // Replace with your own image path
@@ -63,7 +63,7 @@ class RegisterPageState extends State<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header: Create an Account
-              const Text(
+              Text(
                 'Create an Account',
                 style: TextStyle(
                   fontSize: 24,
@@ -73,7 +73,7 @@ class RegisterPageState extends State<RegisterPage> {
               SizedBox(height: 8),
 
               // Subtitle: Welcome! Please enter your details.
-              const Text(
+              Text(
                 'Welcome! Please enter your details.',
                 style: TextStyle(
                   fontSize: 16,
@@ -145,7 +145,7 @@ class RegisterPageState extends State<RegisterPage> {
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.green),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Register',
                     style: TextStyle(
                       color: Colors.white,
@@ -153,9 +153,9 @@ class RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Text(_message),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               // Centered TextButton for navigating back to login page
               Center(
@@ -163,7 +163,7 @@ class RegisterPageState extends State<RegisterPage> {
                   onPressed: () {
                     Navigator.pop(context); // Navigate back to login page
                   },
-                  child: const Text.rich(
+                  child: Text.rich(
                     TextSpan(
                       text: 'Already have an account? ',
                       style: TextStyle(

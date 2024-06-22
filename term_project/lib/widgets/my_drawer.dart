@@ -5,34 +5,38 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/navbar_index_provider.dart';
+
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bottomNavBarIndexProvider = Provider.of<BottomNavBarIndexProvider>(context, listen: false); 
+    final bottomNavBarIndexProvider =
+        Provider.of<BottomNavBarIndexProvider>(context, listen: false);
     User? user = FirebaseAuth.instance.currentUser;
 
-    void onItemTapped(int index) {  
+    void onItemTapped(int index) {
       bottomNavBarIndexProvider.setIndex(index);
+
       if (index == 0) {
-        context.go('/home');
+        context.go('/main');
       } else if (index == 1) {
-        context.go('/list');
+        context.go('/main');
       } else if (index == 2) {
-        context.go('/profile');
-      } else if (index == 3){
+        context.go('/main');
+      } else if (index == 3) {
         context.go('/');
       }
       Navigator.pop(context);
+      
     }
 
-    return Drawer(
+return Drawer(
       child: ListView(
         children: [
-           UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(color: Color.fromARGB(232, 2, 95, 64)),
-            //users name and email should be fetched from the database
+          UserAccountsDrawerHeader(
+            decoration:
+                const BoxDecoration(color: Color.fromARGB(232, 2, 95, 64)),
             accountName: Text(user?.displayName ?? ''),
             accountEmail: Text(user?.email ?? ''),
             currentAccountPicture: const CircleAvatar(
@@ -50,10 +54,10 @@ class MyDrawer extends StatelessWidget {
                     const Row(
                       children: [
                         Expanded(
-                          flex: 6, 
+                          flex: 6,
                           child: Divider(),
                         ),
-                        Spacer(flex: 1), 
+                        Spacer(flex: 1),
                       ],
                     ),
                     ListTile(

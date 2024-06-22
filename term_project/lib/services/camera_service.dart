@@ -1,26 +1,24 @@
  import 'dart:io';
 import 'dart:typed_data';
-
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:term_project/models/my_record.dart';
-import 'package:term_project/services/firestore_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:provider/provider.dart';
 import 'package:term_project/services/firebase_photo_service.dart';
+import 'package:term_project/services/providers/image_provider.dart';
  
 class CameraService{
 
-Future<MyRecord?> takePicture(BuildContext context) async {
+Future<String> takePicture(BuildContext context) async {
   // Ensure the storage permission is granted
   if (!await _requestStoragePermission()) {
     // Handle the case where the user does not grant permission
     // ignore: avoid_print
     print('Storage permission not granted');
-    return null;
+    return '';
   }
 
   final ImagePicker picker = ImagePicker();
@@ -47,42 +45,26 @@ Future<MyRecord?> takePicture(BuildContext context) async {
     final String savedImagePath = path.join(customDir.path, fileName);
     final File savedImage = await imageFile.copy(savedImagePath);
 
-
+    // Save the image to the gallery
+    
     await saveImageToGallery(savedImage);
     
     
     FirebasePhotoService photoService = FirebasePhotoService();
     String? photoUrl = await photoService.uploadPhoto(imageFile);
     if (photoUrl != null) {
-
-        int recordId = await FirebaseService.instance.getAndUpdateId();
-
-        MyRecord newRecord = MyRecord(
-          id: recordId,  
-          foodName: 'Unknown',
-          foodImage: photoUrl,
-          calories: 'Unknown',
-          protein: 'Unknown',
-          fat: 'Unknown',
-          carbs: 'Unknown',
-        );
-
-      // Save the record to Firebase
-      await FirebaseService.instance.saveRecord(newRecord);
-
-
       // ignore: avoid_print
       print('Photo uploaded and available at: $photoUrl');
-      
-      // ignore: use_build_context_synchronously
-      // Provider.of<ImagesProvider>(context, listen: false).setImageUrl(photoUrl);
-      return newRecord;
+      // ignore: avoid_print
+      print('Image saved at: ${savedImage.path}');
+      Provider.of<ImagesProvider>(context, listen: false).setImageUrl(photoUrl);
+      return photoUrl;
     } else {
       // ignore: avoid_print
       print('Failed to upload photo.');
     } 
   }
-  return null;
+  return '';
 
 }
 
@@ -111,6 +93,7 @@ Future<bool> _requestStoragePermission() async {
 
   return status.isGranted;
 }
+
 
 
 

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
-import 'package:term_project/services/providers/profile_provider.dart';
+import 'package:term_project/updater/profile_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,8 +9,6 @@ class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
-
-//ta ma de
 
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
@@ -22,8 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _editProfile() {
-    final profileProvider =
-        Provider.of<ProfileProvider>(context, listen: false);
+    final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
     String? newUsername = profileProvider.username;
     int? newAge = profileProvider.age;
     double? newHeight = profileProvider.height;
@@ -39,29 +34,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 TextField(
                   decoration: const InputDecoration(labelText: 'Username'),
-                  controller:
-                      TextEditingController(text: profileProvider.username),
+                  controller: TextEditingController(text: profileProvider.username),
                   onChanged: (value) => newUsername = value,
                 ),
                 TextField(
                   decoration: const InputDecoration(labelText: 'Age'),
                   keyboardType: TextInputType.number,
-                  controller: TextEditingController(
-                      text: profileProvider.age.toString()),
+                  controller: TextEditingController(text: profileProvider.age.toString()),
                   onChanged: (value) => newAge = int.tryParse(value),
                 ),
                 TextField(
                   decoration: const InputDecoration(labelText: 'Height (cm)'),
                   keyboardType: TextInputType.number,
-                  controller: TextEditingController(
-                      text: profileProvider.height.toString()),
+                  controller: TextEditingController(text: profileProvider.height.toString()),
                   onChanged: (value) => newHeight = double.tryParse(value),
                 ),
                 TextField(
                   decoration: const InputDecoration(labelText: 'Weight (kg)'),
                   keyboardType: TextInputType.number,
-                  controller: TextEditingController(
-                      text: profileProvider.weight.toString()),
+                  controller: TextEditingController(text: profileProvider.weight.toString()),
                   onChanged: (value) => newWeight = double.tryParse(value),
                 ),
               ],
@@ -76,10 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (newUsername != null &&
-                    newAge != null &&
-                    newHeight != null &&
-                    newWeight != null) {
+                if (newUsername != null && newAge != null && newHeight != null && newWeight != null) {
                   profileProvider.updateProfile(
                     username: newUsername!,
                     age: newAge!,
@@ -106,15 +94,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 18, // Increased font size
+            fontSize: 18,
           ),
         ),
         const SizedBox(height: 8),
         SizedBox(
           width: double.infinity,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 24, vertical: 16), // Increased padding
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.8),
               borderRadius: BorderRadius.circular(30),
@@ -129,9 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 18, // Increased font size
-              ),
+              style: const TextStyle(fontSize: 18),
             ),
           ),
         ),
@@ -145,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profileProvider = Provider.of<ProfileProvider>(context);
 
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Prevents wallpaper from moving
+      resizeToAvoidBottomInset: false,
       drawer: const MyDrawer(),
       appBar: AppBar(
         title: const Text('Profile'),
@@ -153,32 +138,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
       extendBodyBehindAppBar: true,
-      bottomNavigationBar: const MyAppBar(),
       body: Stack(
         children: [
-          // Background image container
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/background.jpg'), // Replace with your image path
+                image: AssetImage('assets/background.jpg'), // Replace with your image path
                 fit: BoxFit.cover,
               ),
             ),
           ),
           SingleChildScrollView(
-            padding: const EdgeInsets.only(
-                top: kToolbarHeight + 16.0,
-                left: 16.0,
-                right: 16.0,
-                bottom: 16.0),
+            padding: const EdgeInsets.only(top: kToolbarHeight + 16.0, left: 16.0, right: 16.0, bottom: 16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Center(
                   child: Container(
-                    padding: const EdgeInsets.all(8.0), // Space for the ring
+                    padding: const EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
@@ -192,7 +170,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.grey,
                         shape: BoxShape.circle,
                       ),
-                      // If you have an image, you can use the Image.network or Image.asset widget
                       child: const Icon(
                         Icons.person,
                         size: 60,
@@ -206,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildProfileItem('Age:', profileProvider.age.toString()),
                 _buildProfileItem('Height:', '${profileProvider.height} cm'),
                 _buildProfileItem('Weight:', '${profileProvider.weight} kg'),
-                const SizedBox(height: 50), // Space to prevent blocking
+                const SizedBox(height: 50),
               ],
             ),
           ),
@@ -218,8 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: GestureDetector(
                 onTap: _editProfile,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Colors.green, Colors.lightGreen],

@@ -29,7 +29,7 @@ class LoginPageState extends State<LoginPage> {
 
       setState(() {
         _message = 'Successfully logged in: ${userCredential.user?.email}';
-        context.go('/home');
+        context.go('/main');
       });
     } catch (e) {
       setState(() {
@@ -102,7 +102,7 @@ class LoginPageState extends State<LoginPage> {
         children: [
           // Background image container
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
                     'assets/background.jpg'), // Replace with your image path

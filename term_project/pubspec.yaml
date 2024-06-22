@@ -48,6 +48,7 @@ dependencies:
   universal_html: ^2.2.4
   path: ^1.9.0
   path_provider: ^2.0.11
+  curved_navigation_bar: ^1.0.0
   permission_handler: ^11.3.1
   image_gallery_saver: ^2.0.3
   shared_preferences: ^2.0.9
