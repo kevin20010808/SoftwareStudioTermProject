@@ -7,7 +7,7 @@ class MyRecord {
   String fat;
   String carbs; 
   String weight;
-  
+  String dateTime; // New field
 
   MyRecord({
     this.id = 0,
@@ -18,8 +18,8 @@ class MyRecord {
     this.fat = '',
     this.carbs = '',
     this.weight = '',
+    this.dateTime = '', // Initialize new field
   });
-
 
   factory MyRecord.fromJson(Map<String, dynamic> firestore) {
     return MyRecord(
@@ -31,19 +31,7 @@ class MyRecord {
       fat: firestore['fat'] ?? '',
       carbs: firestore['carbs'] ?? '',
       weight: firestore['weight'] ?? '',
-    );
-  }
-
-
-  MyRecord add(MyRecord record) {
-    return MyRecord(
-        id: record.id,
-        foodName: 'Food Name',
-        foodImage: record.foodImage, 
-        calories: 'Calories: 100',
-        protein: 'Protein: 10g',
-        fat: 'Fat: 5g',
-        carbs: 'Carbs: 20g',
+      dateTime: firestore['dateTime'] ?? '', // Extract date
     );
   }
 
@@ -57,6 +45,7 @@ class MyRecord {
       'fat': fat,
       'carbs': carbs,
       'weight': weight,
+      'dateTime': dateTime, // Include date
     };
   }
 }
