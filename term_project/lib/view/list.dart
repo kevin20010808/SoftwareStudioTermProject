@@ -74,7 +74,7 @@ class _ListScreenState extends State<ListScreen> {
               itemCount: records.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text('Item ${records[index].id}'),
+                  title: Text(records[index].foodName),
                   onTap: () {
                     context.go('/list/${records[index].id}');
                   },

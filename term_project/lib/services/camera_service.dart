@@ -59,6 +59,7 @@ Future<MyRecord?> takePicture(BuildContext context) async {
 
         MyRecord newRecord = MyRecord(
           id: recordId,  
+          foodName: 'Unknown',
           foodImage: photoUrl,
           calories: 'Unknown',
           protein: 'Unknown',
