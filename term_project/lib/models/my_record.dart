@@ -7,7 +7,7 @@ class MyRecord {
   String fat;
   String carbs; 
   String weight;
-  
+  String date;
 
   MyRecord({
     this.id = 0,
@@ -18,6 +18,7 @@ class MyRecord {
     this.fat = '',
     this.carbs = '',
     this.weight = '',
+    this.date = '',
   });
 
 
@@ -31,19 +32,22 @@ class MyRecord {
       fat: firestore['fat'] ?? '',
       carbs: firestore['carbs'] ?? '',
       weight: firestore['weight'] ?? '',
+      date: firestore['date'] ?? '',
     );
   }
 
 
-  MyRecord add(MyRecord record) {
+  MyRecord add(String photoUrl, int id) {
     return MyRecord(
-        id: record.id,
+        id: id,
         foodName: 'Food Name',
-        foodImage: record.foodImage, 
+        foodImage: photoUrl, 
         calories: 'Calories: 100',
         protein: 'Protein: 10g',
         fat: 'Fat: 5g',
         carbs: 'Carbs: 20g',
+        weight: 'Weight: 100g',
+        date: DateTime.now().toString(),
     );
   }
 
@@ -57,6 +61,7 @@ class MyRecord {
       'fat': fat,
       'carbs': carbs,
       'weight': weight,
+      'date': date,
     };
   }
 }

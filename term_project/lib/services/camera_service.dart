@@ -65,6 +65,8 @@ Future<MyRecord?> takePicture(BuildContext context) async {
           protein: 'Unknown',
           fat: 'Unknown',
           carbs: 'Unknown',
+          weight: 'Unknown',
+          date: DateTime.now().toString(),
         );
 
       // Save the record to Firebase
