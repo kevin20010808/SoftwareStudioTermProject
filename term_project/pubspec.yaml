@@ -53,6 +53,15 @@ dependencies:
   image_gallery_saver: ^2.0.3
   shared_preferences: ^2.0.9
 
+  google_fonts: ^6.1.0
+
+  google_generative_ai: ^0.2.0
+  flutter_markdown:
+  url_launcher: ^6.2.4
+
+  animated_text_kit: ^4.2.2
+
+
 
 dev_dependencies:
   flutter_test:

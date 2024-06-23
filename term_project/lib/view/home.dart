@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:term_project/models/my_user.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:term_project/widgets/recent_photo.dart';
+import 'package:go_router/go_router.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -98,6 +98,14 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.chat),
+            onPressed: () {
+              context.go('/main/ai');
+            },
+          ),
+        ],
       ),
       drawer: const MyDrawer(),
       body: Stack(

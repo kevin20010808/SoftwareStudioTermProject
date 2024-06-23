@@ -9,6 +9,7 @@ import 'package:term_project/view/mainscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/refresh_provider.dart';
+import 'package:term_project/src/features/chat/screens/chat_screen.dart';
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
@@ -40,6 +41,10 @@ final GoRouter router = GoRouter(
                   builder: (context, state) => ItemScreen(itemId: state.pathParameters['itemId']!),
                 ),
               ],
+            ),
+            GoRoute(
+              path: 'ai',
+              builder: (context, state) => const ChatScreen(),
             ),
           ],
         ),
