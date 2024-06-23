@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:term_project/services/firebase_photo_service.dart';
+import 'package:term_project/services/image_analysis_service.dart';
  
 class CameraService{
 
@@ -55,22 +56,14 @@ Future<MyRecord?> takePicture(BuildContext context) async {
     String? photoUrl = await photoService.uploadPhoto(imageFile);
     if (photoUrl != null) {
 
-        int recordId = await FirebaseService.instance.getAndUpdateId();
+      int recordId = await FirebaseService.instance.getAndUpdateId();
 
-        MyRecord newRecord = MyRecord(
-          id: recordId,  
-          foodName: 'Unknown',
-          foodImage: photoUrl,
-          calories: 'Unknown',
-          protein: 'Unknown',
-          fat: 'Unknown',
-          carbs: 'Unknown',
-          weight: 'Unknown',
-          date: DateTime.now().toString(),
-        );
+      ImageAnalysisService imageService = ImageAnalysisService();
+      //analyze image
+      MyRecord? record = await imageService.analyzeImageAndGetRecord(photoUrl,recordId.toString());
 
       // Save the record to Firebase
-      await FirebaseService.instance.saveRecord(newRecord);
+      await FirebaseService.instance.saveRecord(record!);
 
 
       // ignore: avoid_print
@@ -78,7 +71,7 @@ Future<MyRecord?> takePicture(BuildContext context) async {
       
       // ignore: use_build_context_synchronously
       // Provider.of<ImagesProvider>(context, listen: false).setImageUrl(photoUrl);
-      return newRecord;
+      return record;
     } else {
       // ignore: avoid_print
       print('Failed to upload photo.');

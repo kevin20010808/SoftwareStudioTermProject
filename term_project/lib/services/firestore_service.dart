@@ -30,6 +30,18 @@ class FirebaseService {
     await docRef.set({'currentId': 0}); 
   }
  }
+ 
+  Future<MyRecord> getRecordById(int id) async {
+    try {
+      final docSnapshot = await _db.collection('records').doc(id.toString()).get();
+      return MyRecord.fromJson(docSnapshot.data()!);
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error loading record: $e');
+      return MyRecord();
+    }
+  }
+
 
   Future<int> getAndUpdateId() async {
     final docRef = FirebaseFirestore.instance.collection('utils').doc('counter');
