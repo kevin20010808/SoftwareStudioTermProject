@@ -10,7 +10,6 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:term_project/models/my_record.dart';
 import 'package:term_project/services/firestore_service.dart';
 import 'package:term_project/services/firebase_photo_service.dart';
-import 'package:term_project/services/image_analysis_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -52,11 +51,32 @@ class CameraService {
       String? photoUrl = await photoService.uploadPhoto(imageFile);
       if (photoUrl != null) {
         int recordId = await FirebaseService.instance.getAndUpdateId();
-        ImageAnalysisService imageAnalysisService = ImageAnalysisService();
-        MyRecord? newRecord = await imageAnalysisService.analyzeImageAndGetRecord(photoUrl, recordId.toString());
+        String currentDateTime = DateFormat('yyyy-MM-dd').format(DateTime.now());
+        
+        // Get the current user's username
+        User? user = FirebaseAuth.instance.currentUser;
+        DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+
+        String username = snapshot.data()?['username'] ?? 'Unknown';
+
+        MyRecord newRecord = MyRecord(
+          id: recordId,
+          foodName: 'Unknown',
+          foodImage: photoUrl,
+          calories: 'Calories: 100',
+          protein: 'Protein: 10g',
+          fat: 'Fat: 5g',
+          carbs: 'Carbs: 20g',
+          dateTime: currentDateTime,
+          username: username, // Save the current user's username
+        );
 
         // Save the record to Firebase
-        await FirebaseService.instance.saveRecord(newRecord!);
+        await FirebaseService.instance.saveRecord(newRecord);
 
         print('Photo uploaded and available at: $photoUrl');
         return newRecord;

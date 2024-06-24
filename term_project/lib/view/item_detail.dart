@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:term_project/models/my_record.dart';
 import 'package:term_project/services/firestore_service.dart';
+import 'package:term_project/services/image_analysis_service.dart';
+import 'package:term_project/services/providers/image_provider.dart';
+import 'package:intl/intl.dart';
 
 class ItemDetailScreen extends StatelessWidget {
   final String itemId;
-  final VoidCallback refreshCallback;
 
-  const ItemDetailScreen({super.key, required this.itemId, required this.refreshCallback});
+
+  const ItemDetailScreen({super.key, required this.itemId});
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        refreshCallback();
         context.go('/main');
         return false; // Prevent the default back button behavior
       },
@@ -23,7 +26,6 @@ class ItemDetailScreen extends StatelessWidget {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              refreshCallback();
               context.go('/main');
             },
           ),

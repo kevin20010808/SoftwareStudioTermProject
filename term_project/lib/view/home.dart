@@ -15,7 +15,7 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with TickerProviderStateMixin {
+class _HomeState extends State<Home> {
   User? user = FirebaseAuth.instance.currentUser;
   MyUser? myUser;
   double bmr = 0.0;
@@ -24,132 +24,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   double fat = 0.0;
   double carbs = 0.0;
   double bmi = 0.0;
-
-  late AnimationController _controller1;
-  late AnimationController _controller2;
-  late AnimationController _controller3;
-  late AnimationController _controller4;
-  late AnimationController _controller5;
-
-  late Animation<double> _animation1;
-  late Animation<double> _animation2;
-  late Animation<double> _animation3;
-  late Animation<double> _animation4;
-  late Animation<double> _animation5;
-
-  late Animation<double> _opacityAnimation1;
-  late Animation<double> _opacityAnimation2;
-  late Animation<double> _opacityAnimation3;
-  late Animation<double> _opacityAnimation4;
-  late Animation<double> _opacityAnimation5;
+  double prot_max = 0.0;
+  double carb_max = 0.0;
+  double fat_max = 0.0;
 
   @override
   void initState() {
     super.initState();
-
-    _controller1 = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _controller2 = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _controller3 = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _controller4 = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _controller5 = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-
-    _animation1 = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller1,
-        curve: Curves.easeOut,
-      ),
-    );
-    _animation2 = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller2,
-        curve: Curves.easeOut,
-      ),
-    );
-    _animation3 = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller3,
-        curve: Curves.easeOut,
-      ),
-    );
-    _animation4 = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller4,
-        curve: Curves.easeOut,
-      ),
-    );
-    _animation5 = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller5,
-        curve: Curves.easeOut,
-      ),
-    );
-
-    _opacityAnimation1 = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller1,
-        curve: Curves.easeOut,
-      ),
-    );
-    _opacityAnimation2 = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller2,
-        curve: Curves.easeOut,
-      ),
-    );
-    _opacityAnimation3 = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller3,
-        curve: Curves.easeOut,
-      ),
-    );
-    _opacityAnimation4 = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller4,
-        curve: Curves.easeOut,
-      ),
-    );
-    _opacityAnimation5 = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller5,
-        curve: Curves.easeOut,
-      ),
-    );
-
     if (user != null) {
       _fetchUserData();
     }
-
-    // Start the animations
-    _controller1.forward();
-    _controller2.forward();
-    _controller3.forward();
-    _controller4.forward();
-    _controller5.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller1.dispose();
-    _controller2.dispose();
-    _controller3.dispose();
-    _controller4.dispose();
-    _controller5.dispose();
-    super.dispose();
   }
 
   Future<void> _fetchUserData() async {
@@ -166,6 +50,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           bmr = _calculateBMR(
               myUser!.age ?? 0, myUser!.height ?? 0.0, myUser!.weight ?? 0.0);
           bmi = _calculateBMI(myUser!.height ?? 0.0, myUser!.weight ?? 0.0);
+          if (bmr > 0) {
+            prot_max = _calculateProt(bmr);
+            carb_max = _calculateCarb(bmr);
+            fat_max = _calculateFat(bmr);
+          }
         });
       }
     } catch (e) {
@@ -175,26 +64,131 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   double _calculateBMR(int age, double height, double weight) {
     // Harris-Benedict equation (generic formula, not gender-specific)
+    if (age <= 0 || height <= 0 || weight <= 0) return 0.0;
     return 66 + (6.23 * weight) + (12.7 * height) - (6.8 * age);
   }
 
   double _calculateBMI(double height, double weight) {
+    if (height <= 0 || weight <= 0) return 0.0;
     return weight / ((height / 100) * (height / 100));
   }
 
-  Widget _buildLinearProgressIndicator(double value, String label, double maxValue) {
+  double _calculateProt(double bmr) {
+    return (bmr * 0.3) / 4;
+  }
+
+  double _calculateCarb(double bmr) {
+    return (bmr * 0.4) / 4;
+  }
+
+  double _calculateFat(double bmr) {
+    return (bmr * 0.3) / 9;
+  }
+
+  Widget _buildCircularProgressIndicator(double value, String label, double maxValue) {
+    double progressValue = maxValue > 0 ? value / maxValue : 0;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: value / maxValue,
-          minHeight: 10,
-          backgroundColor: Colors.grey[300],
+        SizedBox(
+          height: 180, // Increased height
+          width: 180, // Increased width
+          child: Stack(
+            children: [
+              Center(
+                child: Container(
+                  height: 180, // Match the size of the SizedBox
+                  width: 180, // Match the size of the SizedBox
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 4), // Outer black border
+                    borderRadius: BorderRadius.circular(90), // Make it circular
+                  ),
+                  child: Center(
+                    child: Container(
+                      height: 172, // Slightly smaller to fit inside the outer border
+                      width: 172, // Slightly smaller to fit inside the outer border
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2), // Inner black border
+                        borderRadius: BorderRadius.circular(86), // Make it circular
+                      ),
+                      child: CircularProgressIndicator(
+                        value: progressValue.isFinite ? progressValue : 0,
+                        strokeWidth: 12, // Increased stroke width for better visibility
+                        backgroundColor: Colors.grey[300],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      size: 40,
+                    ),
+                    Text(
+                      '${calories.ceil()}',
+                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.orange),
+                    ),
+                    Text(
+                      ' / ${bmr.ceil()}',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const Text(
+                      'KCAL LEFT',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
-        Text('${(value / maxValue * 100).toStringAsFixed(1)}%', style: const TextStyle(fontSize: 14)),
+      ],
+    );
+  }
+
+  Widget _buildLinearProgressIndicator(double value, String label, double maxValue, Color color, {bool showValueLeft = true}) {
+    double progressValue = maxValue > 0 ? value / maxValue : 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          height: 14,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(color: Colors.black, width: 1), // Black outline
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: LinearProgressIndicator(
+              value: progressValue.isFinite ? (progressValue > 1 ? 1 : progressValue) : 0,
+              backgroundColor: Colors.transparent, // Make the background transparent to show the container's color
+              color: color,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        if (showValueLeft)
+          Text(
+            '${(maxValue - value).toStringAsFixed(1)}g left',
+            style: const TextStyle(fontSize: 14),
+            textAlign: TextAlign.center,
+          )
+        else
+          Text(
+            '${(progressValue * 100).toStringAsFixed(1)}%',
+            style: const TextStyle(fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
       ],
     );
   }
@@ -209,6 +203,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             icon: Icon(Icons.chat),
             onPressed: () {
               context.go('/main/ai');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                _fetchUserData();
+              });
             },
           ),
         ],
@@ -237,7 +239,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ClipPath(
                       clipper: CurvedBottomClipper(),
                       child: Container(
-                        height: 620,
+                        height: 560,
                         color: themeProvider.isDarkTheme
                             ? const Color.fromARGB(255, 44, 10, 106)?.withOpacity(0.5)
                             : Colors.green[100]?.withOpacity(1), // Color based on theme
@@ -245,94 +247,50 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             const SizedBox(height: 40),
-                            AnimatedBuilder(
-                              animation: _controller1,
-                              builder: (context, child) {
-                                return FadeTransition(
-                                  opacity: _opacityAnimation1,
-                                  child: Transform.translate(
-                                    offset: Offset(0, _animation1.value),
-                                    child: Text(
-                                      'Hi, ${myUser?.username ?? 'User'}', // Display username if available
-                                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                );
-                              },
+                            Text(
+                              'Hi, ${myUser?.username ?? 'User'}', // Display username if available
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 16),
-                            AnimatedBuilder(
-                              animation: _controller2,
-                              builder: (context, child) {
-                                return FadeTransition(
-                                  opacity: _opacityAnimation2,
-                                  child: Transform.translate(
-                                    offset: Offset(0, _animation2.value),
-                                    child: const Text(
-                                      'Calories Left',
-                                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            AnimatedBuilder(
-                              animation: _controller3,
-                              builder: (context, child) {
-                                return FadeTransition(
-                                  opacity: _opacityAnimation3,
-                                  child: Transform.translate(
-                                    offset: Offset(0, _animation3.value),
-                                    child: Text(
-                                      '${calories.toStringAsFixed(0)}', // Adjust the calculation as needed
-                                      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.orange),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            AnimatedBuilder(
-                              animation: _controller4,
-                              builder: (context, child) {
-                                return FadeTransition(
-                                  opacity: _opacityAnimation4,
-                                  child: Transform.translate(
-                                    offset: Offset(0, _animation4.value),
-                                    child: Text(
-                                      'of ${bmr.toStringAsFixed(0)} kcal', // Adjust the calculation as needed
-                                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            AnimatedBuilder(
-                              animation: _controller5,
-                              builder: (context, child) {
-                                return FadeTransition(
-                                  opacity: _opacityAnimation5,
-                                  child: Transform.translate(
-                                    offset: Offset(0, _animation5.value),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                                      child: Column(
-                                        children: <Widget>[
-                                          _buildLinearProgressIndicator(protein, 'Protein', 100),
-                                          const SizedBox(height: 16),
-                                          _buildLinearProgressIndicator(fat, 'Fat', 70),
-                                          const SizedBox(height: 16),
-                                          _buildLinearProgressIndicator(carbs, 'Carbs', 300),
-                                          const SizedBox(height: 16),
-                                          _buildLinearProgressIndicator(bmi, 'BMI', 40),
-                                        ],
+                            _buildCircularProgressIndicator(calories, 'Calories', bmr),
+                            const SizedBox(height: 32),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                              child: Column(
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: _buildLinearProgressIndicator(protein, 'Protein', prot_max, Colors.purple),
                                       ),
-                                    ),
+                                      const SizedBox(width: 30),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            const SizedBox(height: 30), // Add space above the Fat bar
+                                            _buildLinearProgressIndicator(fat, 'Fat', fat_max, Colors.blue),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 30),
+                                      Expanded(
+                                        child: _buildLinearProgressIndicator(carbs, 'Carbs', carb_max, Colors.green),
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
+                                  const SizedBox(height: 30),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 150, // Set a specific width for the BMI progress bar
+                                        child: _buildLinearProgressIndicator(bmi, 'BMI', 40, Colors.red, showValueLeft: false),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                             const SizedBox(height: 16),
                           ],

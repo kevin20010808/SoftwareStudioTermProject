@@ -7,7 +7,6 @@ import 'package:term_project/services/firestore_service.dart';
 import 'package:term_project/services/providers/image_provider.dart';
 import 'package:term_project/services/camera_service.dart';
 import 'package:intl/intl.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -22,6 +21,7 @@ class RecentPhoto extends StatefulWidget {
 
 class _RecentPhotoState extends State<RecentPhoto> {
   List<MyRecord> _foodItems = [];
+  List<MyRecord> _allDailyRecords = [];
   final CameraService _cameraService = CameraService();
   bool _hasMoreThanFourItems = false;
 
@@ -44,19 +44,19 @@ class _RecentPhotoState extends State<RecentPhoto> {
     List<MyRecord> allRecords = await FirebaseService.instance.loadAllRecords();
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    List<MyRecord> dailyRecords = allRecords
+    _allDailyRecords = allRecords
         .where((record) => record.dateTime == today && record.username == username)
         .toList();
 
-    dailyRecords.sort((a, b) => b.id.compareTo(a.id));
-    print('Total daily records: ${dailyRecords.length}');
+    _allDailyRecords.sort((a, b) => b.id.compareTo(a.id));
+    print('Total daily records: ${_allDailyRecords.length}');
 
-    _hasMoreThanFourItems = dailyRecords.length > 4;
+    _hasMoreThanFourItems = _allDailyRecords.length > 4;
 
-    if (dailyRecords.length > 4) {
-      _foodItems = dailyRecords.take(4).toList();
+    if (_allDailyRecords.length > 4) {
+      _foodItems = _allDailyRecords.take(4).toList();
     } else {
-      _foodItems = dailyRecords;
+      _foodItems = _allDailyRecords;
     }
 
     _updateNutrition();
@@ -66,10 +66,10 @@ class _RecentPhotoState extends State<RecentPhoto> {
   }
 
   void _updateNutrition() {
-    int totalCalories = _foodItems.fold<int>(0, (sum, item) => sum + _parseInt(item.calories));
-    double totalProtein = _foodItems.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.protein));
-    double totalFat = _foodItems.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.fat));
-    double totalCarbs = _foodItems.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.carbs));
+    int totalCalories = _allDailyRecords.fold<int>(0, (sum, item) => sum + _parseInt(item.calories));
+    double totalProtein = _allDailyRecords.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.protein));
+    double totalFat = _allDailyRecords.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.fat));
+    double totalCarbs = _allDailyRecords.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.carbs));
 
     widget.onCaloriesChanged(totalCalories, totalProtein, totalFat, totalCarbs);
   }
