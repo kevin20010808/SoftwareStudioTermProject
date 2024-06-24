@@ -50,12 +50,13 @@ class _ListScreenState extends State<ListScreen> {
                   _loadRecords();  // Reload records to include the new one
                   if (mounted) {
                     Provider.of<ImagesProvider>(context, listen: false).setImageUrl(newRecord.foodImage);
+                    // ignore: use_build_context_synchronously
                     context.go('/list/${newRecord.id}'); 
                   }
                 } else if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to take or upload picture')),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   const SnackBar(content: Text('Failed to take or upload picture')),
+                  // );
                 }
               },
               child: const Card(
