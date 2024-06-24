@@ -1,27 +1,29 @@
 // services/image_analysis_service.dart
 import 'dart:typed_data';
-
+import 'package:image/image.dart' as img;
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:term_project/models/my_record.dart';
-import 'package:term_project/services/firestore_service.dart';
 
 class ImageAnalysisService {
   final String apiBaseUrl ='https://api.openai.com/v1/chat/completions';
   final String apiKey = '';
 
   Future<MyRecord?> analyzeImageAndGetRecord(String imageUrl, String itemId) async {
-    var url = Uri.parse(apiBaseUrl);
     Uint8List imageBytes = await _downloadImage(imageUrl);
-    String base64Image = base64Encode(imageBytes);
+    Uint8List compressedImageBytes = await _compressImage(imageBytes);
+    String base64Image = base64Encode(compressedImageBytes);
 
+    var url = Uri.parse(apiBaseUrl);
     var response = await http.post(
       url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey'
+        'Authorization': 'Bearer $apiKey',
       },
       body: jsonEncode({
+        'model': 'gpt-4o-2024-05-13',
         'messages': [
           {
             'role': 'system',
@@ -29,36 +31,32 @@ class ImageAnalysisService {
           },
           {
             'role': 'user',
-            'content': base64Image,
+            'content': base64Image
           }
-        ],
-        'model': 'gpt-4o-2024-05-13',
-      })
+        ]
+      }),
     );
 
-    MyRecord record;
-
-
-
     if (response.statusCode == 200) {
-      var odata = jsonDecode(response.body);
-      String content = odata['choices'][0]['message']['content'];
+      var data = jsonDecode(response.body);
+      String content = data['choices'][0]['message']['content'];
       content = content.replaceAll('```json', '').replaceAll('```', '').trim();
-      var data = jsonDecode(content);
-      record = MyRecord(
+      var nutritionData = jsonDecode(content);
+
+      var record = MyRecord(
         id: int.parse(itemId),
-        foodName: data['name'],
+        foodName: nutritionData['name'],
         foodImage: imageUrl,
-        weight: 'Weight: ${data['weight']}g',
-        calories: 'Calories: ${data['calories']}',
-        protein: 'Protein: ${data['protein']}g',
-        fat: 'Fat: ${data['fat']}g',
-        carbs: 'Carbs: ${data['carbs']}g',
-        date: DateTime.now().toString(),
+        weight: 'Weight: ${nutritionData['weight']}',
+        calories: 'Calories: ${nutritionData['calories']}',
+        protein: 'Protein: ${nutritionData['protein']}',
+        fat: 'Fat: ${nutritionData['fat']}',
+        carbs: 'Carbs: ${nutritionData['carbs']}',
+        dateTime: DateFormat('yyyy-MM-dd').format(DateTime.now()),
       );
-    
+      print('Record: $record');
       return record;
-    }else {
+    } else {
       print('Failed to analyze image: ${response.body}');
     }
 
@@ -72,5 +70,11 @@ class ImageAnalysisService {
     } else {
       throw Exception('Failed to download image');
     }
+  }
+
+  Future<Uint8List> _compressImage(Uint8List imageBytes) async {
+    img.Image image = img.decodeImage(imageBytes)!;
+    img.Image resizedImage = img.copyResize(image, width: 300);
+    return Uint8List.fromList(img.encodeJpg(resizedImage, quality: 85));
   }
 }

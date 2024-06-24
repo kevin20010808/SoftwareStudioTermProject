@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:term_project/models/my_record.dart';
 import 'package:term_project/services/camera_service.dart';
 import 'package:term_project/services/firestore_service.dart';
 import 'package:term_project/services/providers/image_provider.dart';
-import 'package:term_project/widgets/app_bar.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:term_project/services/providers/theme_provider.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -18,6 +19,7 @@ class ListScreen extends StatefulWidget {
 class _ListScreenState extends State<ListScreen> {
   final CameraService _cameraService = CameraService();
   List<MyRecord> records = [];
+  String _selectedTab = 'All'; // Track the selected tab
 
   @override
   void initState() {
@@ -32,25 +34,28 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MyAppBar(),
-      drawer: const MyDrawer(),
-      appBar: AppBar(
-        title: const Text('List'),
-      ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 100,
-            width: 300,
-            child: InkWell(
-              onTap: () async {
+    List<MyRecord> filteredRecords = _selectedTab == 'All'
+        ? records
+        : records.where((record) => record.dateTime == DateFormat('yyyy/MM/dd').format(DateTime.now())).toList();
+
+    // Sort records by dateTime in descending order
+    filteredRecords.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        drawer: const MyDrawer(),
+        appBar: AppBar(
+          title: const Text('List'),
+          actions: [
+            IconButton(
+              onPressed: () async {
                 MyRecord? newRecord = await _cameraService.takePicture(context);
                 if (newRecord != null && mounted) {
-                  _loadRecords();  // Reload records to include the new one
+                  _loadRecords(); // Reload records to include the new one
                   if (mounted) {
                     Provider.of<ImagesProvider>(context, listen: false).setImageUrl(newRecord.foodImage);
-                    context.go('/list/${newRecord.id}'); 
+                    context.go('/main/list/${newRecord.id}');
                   }
                 } else if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -58,31 +63,139 @@ class _ListScreenState extends State<ListScreen> {
                   );
                 }
               },
-              child: const Card(
-                color: Color.fromARGB(232, 2, 95, 64),
-                child: Center(
-                  child: Text(
-                    'Add item',
-                    style: TextStyle(fontSize: 20, color: Colors.white),
+              icon: Icon(Icons.camera_alt_outlined, size: 30),
+            ),
+          ],
+          bottom: TabBar(
+            onTap: (index) {
+              setState(() {
+                _selectedTab = index == 0 ? 'All' : 'Daily';
+              });
+            },
+            tabs: [
+              Tab(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.rectangle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'All',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+              Tab(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.rectangle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Daily',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: records.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('${records[index].foodName} Date: ${records[index].date}'),
-                  onTap: () {
-                    context.go('/list/${records[index].id}');
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+        ),
+        body: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            Color shadowColor = themeProvider.isDarkTheme ? Colors.black54 : Colors.grey[400]!;
+
+            return Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                        themeProvider.isDarkTheme
+                            ? 'assets/dark2.png'
+                            : 'assets/background.jpg',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredRecords.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Container(
+                              height: 250,
+                              width: double.infinity,
+                              padding: EdgeInsets.all(20),
+                              margin: EdgeInsets.only(bottom: 20),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                image: DecorationImage(
+                                  // image: AssetImage(filteredRecords[index].foodImage),
+                                  image: AssetImage('assets/food_2.jpg'),
+                                  fit: BoxFit.fill,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: shadowColor,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 10),
+                                  )
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              "${records[index].foodName}",
+                                              style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+                                            ),
+                                            SizedBox(height: 130),
+                                            Text(
+                                              'Date: ${records[index].dateTime}',
+                                              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            onTap: () {
+                              context.go('/main/list/${filteredRecords[index].id}');
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
