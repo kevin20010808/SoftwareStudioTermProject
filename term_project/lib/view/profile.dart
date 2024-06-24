@@ -5,7 +5,6 @@ import 'package:term_project/models/my_user.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/theme_provider.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback refreshCallback;
@@ -41,8 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
   late Animation<double> _opacityAnimation3;
   late Animation<double> _opacityAnimation4;
   late Animation<double> _opacityAnimation5;
-
-  final List<bool> _isVisible = [false, false, false, false, false];
 
   @override
   void initState() {
@@ -137,6 +134,13 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
         curve: Curves.easeOut,
       ),
     );
+
+    // Start the animations
+    _controller1.forward();
+    _controller2.forward();
+    _controller3.forward();
+    _controller4.forward();
+    _controller5.forward();
   }
 
   Future<void> _fetchUserData() async {
@@ -154,19 +158,10 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           _ageController.text = myUser!.age?.toString() ?? '';
           _weightController.text = myUser!.weight?.toString() ?? '';
           _heightController.text = myUser!.height?.toString() ?? '';
-          _resetAndStartAnimations();
         });
       }
     } catch (e) {
       print('Error fetching user data: $e');
-    }
-  }
-
-  void _resetAndStartAnimations() {
-    for (var i = 0; i < _isVisible.length; i++) {
-      _isVisible[i] = false;
-      _getController(i).reset();
-      _getController(i).forward();
     }
   }
 
@@ -258,19 +253,6 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update profile: $e')),
       );
-    }
-  }
-
-  void _onVisibilityChanged(bool visible, int index) {
-    if (visible) {
-      if (!_isVisible[index]) {
-        _isVisible[index] = true;
-        _getController(index).reset();
-        _getController(index).forward();
-      }
-    } else {
-      _isVisible[index] = false;
-      _getController(index).reset();
     }
   }
 
@@ -370,126 +352,96 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Center(
-                      child: VisibilityDetector(
-                        key: Key('profilePicture'),
-                        onVisibilityChanged: (visibilityInfo) {
-                          _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 0);
-                        },
-                        child: AnimatedBuilder(
-                          animation: _controller1,
-                          builder: (context, child) {
-                            return FadeTransition(
-                              opacity: _getOpacityAnimation(0),
-                              child: Transform.translate(
-                                offset: Offset(0, _getAnimation(0).value),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: themeProvider.isDarkTheme
-                                          ? [Colors.deepPurple, Colors.deepPurpleAccent]
-                                          : [Colors.green, Colors.lightGreen],
-                                    ),
+                      child: AnimatedBuilder(
+                        animation: _controller1,
+                        builder: (context, child) {
+                          return FadeTransition(
+                            opacity: _opacityAnimation1,
+                            child: Transform.translate(
+                              offset: Offset(0, _animation1.value),
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: themeProvider.isDarkTheme
+                                        ? [Colors.deepPurple, Colors.deepPurpleAccent]
+                                        : [Colors.green, Colors.lightGreen],
                                   ),
-                                  child: Container(
-                                    width: 120.0,
-                                    height: 120.0,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.grey,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.white,
-                                    ),
+                                ),
+                                child: Container(
+                                  width: 120.0,
+                                  height: 120.0,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.grey,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.person,
+                                    size: 60,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 24),
-                    VisibilityDetector(
-                      key: Key('username'),
-                      onVisibilityChanged: (visibilityInfo) {
-                        _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 1);
+                    AnimatedBuilder(
+                      animation: _controller2,
+                      builder: (context, child) {
+                        return FadeTransition(
+                          opacity: _opacityAnimation2,
+                          child: Transform.translate(
+                            offset: Offset(0, _animation2.value),
+                            child: _buildProfileItem('Username:', _usernameController.text, themeProvider),
+                          ),
+                        );
                       },
-                      child: AnimatedBuilder(
-                        animation: _controller2,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _getOpacityAnimation(1),
-                            child: Transform.translate(
-                              offset: Offset(0, _getAnimation(1).value),
-                              child: _buildProfileItem('Username:', _usernameController.text, themeProvider),
-                            ),
-                          );
-                        },
-                      ),
                     ),
-                    VisibilityDetector(
-                      key: Key('email'),
-                      onVisibilityChanged: (visibilityInfo) {
-                        _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 2);
+                    AnimatedBuilder(
+                      animation: _controller3,
+                      builder: (context, child) {
+                        return FadeTransition(
+                          opacity: _opacityAnimation3,
+                          child: Transform.translate(
+                            offset: Offset(0, _animation3.value),
+                            child: _buildProfileItem('Email:', myUser?.email ?? 'N/A', themeProvider),
+                          ),
+                        );
                       },
-                      child: AnimatedBuilder(
-                        animation: _controller3,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _getOpacityAnimation(2),
-                            child: Transform.translate(
-                              offset: Offset(0, _getAnimation(2).value),
-                              child: _buildProfileItem('Email:', myUser?.email ?? 'N/A', themeProvider),
-                            ),
-                          );
-                        },
-                      ),
                     ),
-                    VisibilityDetector(
-                      key: Key('age'),
-                      onVisibilityChanged: (visibilityInfo) {
-                        _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 3);
+                    AnimatedBuilder(
+                      animation: _controller4,
+                      builder: (context, child) {
+                        return FadeTransition(
+                          opacity: _opacityAnimation4,
+                          child: Transform.translate(
+                            offset: Offset(0, _animation4.value),
+                            child: _buildProfileItem('Age:', _ageController.text, themeProvider),
+                          ),
+                        );
                       },
-                      child: AnimatedBuilder(
-                        animation: _controller4,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _getOpacityAnimation(3),
-                            child: Transform.translate(
-                              offset: Offset(0, _getAnimation(3).value),
-                              child: _buildProfileItem('Age:', _ageController.text, themeProvider),
-                            ),
-                          );
-                        },
-                      ),
                     ),
-                    VisibilityDetector(
-                      key: Key('heightWeight'),
-                      onVisibilityChanged: (visibilityInfo) {
-                        _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 4);
-                      },
-                      child: AnimatedBuilder(
-                        animation: _controller5,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _getOpacityAnimation(4),
-                            child: Transform.translate(
-                              offset: Offset(0, _getAnimation(4).value),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildProfileItem('Height:', '${_heightController.text} cm', themeProvider),
-                                  _buildProfileItem('Weight:', '${_weightController.text} kg', themeProvider),
-                                ],
-                              ),
+                    AnimatedBuilder(
+                      animation: _controller5,
+                      builder: (context, child) {
+                        return FadeTransition(
+                          opacity: _opacityAnimation5,
+                          child: Transform.translate(
+                            offset: Offset(0, _animation5.value),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildProfileItem('Height:', '${_heightController.text} cm', themeProvider),
+                                _buildProfileItem('Weight:', '${_weightController.text} kg', themeProvider),
+                              ],
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 50),
                   ],

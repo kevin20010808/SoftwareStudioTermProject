@@ -31,7 +31,7 @@ class MyAppBar extends StatelessWidget {
           backgroundColor: Colors.transparent,
           color: themeProvider.isDarkTheme
               ? Color.fromARGB(255, 91, 51, 166)
-              : Colors.green,
+              : Color.fromARGB(255, 86, 188, 81),
         );
       },
     );

@@ -6,6 +6,8 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:term_project/src/features/chat/models/url_utils.dart'; // Utility to detect URLs
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:term_project/services/providers/theme_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -46,10 +48,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gemini AI'),
+        actions: [
+          IconButton(
+            icon: Icon(themeProvider.isDarkTheme ? Icons.dark_mode : Icons.light_mode),
+            onPressed: () {
+              themeProvider.toggleTheme();
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -87,8 +99,8 @@ class _ChatScreenState extends State<ChatScreen> {
               width: MediaQuery.of(context).size.width,
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                color: themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
+                border: Border(top: BorderSide(color: themeProvider.isDarkTheme ? Colors.grey.shade800 : Colors.grey.shade200)),
               ),
               child: Row(
                 children: [
@@ -102,15 +114,16 @@ class _ChatScreenState extends State<ChatScreen> {
                         focusNode: _textFieldFocus,
                         decoration: InputDecoration(
                           hintText: 'Ask me anything...',
-                          hintStyle: const TextStyle(color: Colors.grey),
+                          hintStyle: TextStyle(color: themeProvider.isDarkTheme ? Colors.grey.shade500 : Colors.grey),
                           filled: true,
-                          fillColor: Colors.grey.shade200,
+                          fillColor: themeProvider.isDarkTheme ? Colors.grey[800] : Colors.grey.shade200,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                           border: OutlineInputBorder(
                             borderSide: BorderSide.none,
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
+                        style: TextStyle(color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                       ),
                     ),
                   ),

@@ -8,9 +8,11 @@ import 'package:term_project/services/providers/image_provider.dart';
 import 'package:term_project/services/camera_service.dart';
 import 'package:intl/intl.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RecentPhoto extends StatefulWidget {
-  final Function(int) onCaloriesChanged;
+  final Function(int, double, double, double) onCaloriesChanged;
 
   const RecentPhoto({super.key, required this.onCaloriesChanged});
 
@@ -18,65 +20,38 @@ class RecentPhoto extends StatefulWidget {
   _RecentPhotoState createState() => _RecentPhotoState();
 }
 
-class _RecentPhotoState extends State<RecentPhoto> with TickerProviderStateMixin {
+class _RecentPhotoState extends State<RecentPhoto> {
   List<MyRecord> _foodItems = [];
   final CameraService _cameraService = CameraService();
   bool _hasMoreThanFourItems = false;
 
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _animations;
-  late List<Animation<double>> _opacityAnimations;
-  final List<bool> _isVisible = [];
-
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
     _loadRecentFoodItems();
   }
 
-  void _initializeAnimations() {
-    _controllers = List.generate(10, (index) {
-      return AnimationController(
-        duration: const Duration(milliseconds: 250),
-        vsync: this,
-      );
-    });
-
-    _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 15.0, end: 0.0).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeOut,
-        ),
-      );
-    }).toList();
-
-    _opacityAnimations = _controllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-          parent: controller,
-          curve: Curves.easeOut,
-        ),
-      );
-    }).toList();
-
-    _isVisible.addAll(List.generate(10, (index) => false));
-  }
-
   Future<void> _loadRecentFoodItems() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+
+    String username = snapshot.data()?['username'] ?? 'Unknown';
+
     List<MyRecord> allRecords = await FirebaseService.instance.loadAllRecords();
-    String today = DateFormat('yyyy/MM/dd').format(DateTime.now());
+    String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     List<MyRecord> dailyRecords = allRecords
-        .where((record) => record.dateTime == today)
+        .where((record) => record.dateTime == today && record.username == username)
         .toList();
 
     dailyRecords.sort((a, b) => b.id.compareTo(a.id));
     print('Total daily records: ${dailyRecords.length}');
 
     _hasMoreThanFourItems = dailyRecords.length > 4;
-    //print( dailyRecords.length );
 
     if (dailyRecords.length > 4) {
       _foodItems = dailyRecords.take(4).toList();
@@ -84,35 +59,34 @@ class _RecentPhotoState extends State<RecentPhoto> with TickerProviderStateMixin
       _foodItems = dailyRecords;
     }
 
-    _updateCalories();
+    _updateNutrition();
     setState(() {
       print('Loaded ${_foodItems.length} items. More than 4 items: $_hasMoreThanFourItems');
     });
   }
 
-  void _updateCalories() {
-    //final totalCalories = _foodItems.fold<int>(0, (sum, item) => sum + int.parse(item.calories.replaceAll('Calories: ', '')));
-    //widget.onCaloriesChanged(totalCalories);
+  void _updateNutrition() {
+    int totalCalories = _foodItems.fold<int>(0, (sum, item) => sum + _parseInt(item.calories));
+    double totalProtein = _foodItems.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.protein));
+    double totalFat = _foodItems.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.fat));
+    double totalCarbs = _foodItems.fold<double>(0.0, (sum, item) => sum + _parseDouble(item.carbs));
+
+    widget.onCaloriesChanged(totalCalories, totalProtein, totalFat, totalCarbs);
   }
 
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
+  int _parseInt(String input) {
+    try {
+      return int.parse(input.replaceAll(RegExp(r'[^0-9]'), ''));
+    } catch (e) {
+      return 0;
     }
-    super.dispose();
   }
 
-  void _onVisibilityChanged(bool visible, int index) {
-    if (visible) {
-      if (!_isVisible[index]) {
-        _isVisible[index] = true;
-        _controllers[index].reset();
-        _controllers[index].forward();
-      }
-    } else {
-      _isVisible[index] = false;
-      _controllers[index].reset();
+  double _parseDouble(String input) {
+    try {
+      return double.parse(input.replaceAll(RegExp(r'[^0-9.]'), ''));
+    } catch (e) {
+      return 0.0;
     }
   }
 
@@ -152,68 +126,66 @@ class _RecentPhotoState extends State<RecentPhoto> with TickerProviderStateMixin
                 itemCount: _foodItems.length,
                 itemBuilder: (context, index) {
                   final foodItem = _foodItems[index];
-                  return VisibilityDetector(
-                    key: Key('photo-$index'),
-                    onVisibilityChanged: (visibilityInfo) {
-                      _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, index);
-                    },
-                    child: AnimatedBuilder(
-                      animation: _controllers[index],
-                      builder: (context, child) {
-                        return FadeTransition(
-                          opacity: _opacityAnimations[index],
-                          child: Transform.translate(
-                            offset: Offset(0, _animations[index].value),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          foodItem.foodName,
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '${foodItem.calories} CAL',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    flex: 3,
-                                    child: InkWell(
-                                      onTap: () => context.go('/main/list/${foodItem.id}'),
-                                      child: Container(
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          image: DecorationImage(
-                                            image: AssetImage('assets/food_2.jpg'),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: () => context.go('/main/list/${foodItem.id}'),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        elevation: 5,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      foodItem.foodName,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${foodItem.calories} CAL',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 50),
+                              Expanded(
+                                flex: 2,
+                                child: Container(
+                                  height: 125,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    image: DecorationImage(
+                                      image: foodItem.foodImage.isNotEmpty
+                                          ? NetworkImage(foodItem.foodImage)
+                                          : AssetImage('assets/placeholder_image.jpg') as ImageProvider,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   );
                 },

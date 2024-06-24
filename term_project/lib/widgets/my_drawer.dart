@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:term_project/models/my_user.dart';
 import 'package:term_project/services/providers/navbar_index_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:term_project/services/providers/theme_provider.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -33,20 +33,23 @@ class MyDrawer extends StatelessWidget {
         Provider.of<BottomNavBarIndexProvider>(context);
     User? user = FirebaseAuth.instance.currentUser;
 
-    void onItemTapped(int index) {
-      bottomNavBarIndexProvider.setIndex(index);
-
-      if (index == 0) {
-        context.go('/main');
-      } else if (index == 1) {
-        context.go('/main');
-      } else if (index == 2) {
-        context.go('/main');
-      } else if (index == 3) {
-        context.go('/');
-        bottomNavBarIndexProvider.setIndex(0);
+    void onItemTapped(int index) async {
+      if (index == 3) { // Logout
+        await FirebaseAuth.instance.signOut();
+        Navigator.pop(context); // Close the drawer
+        context.read<BottomNavBarIndexProvider>().setIndex(0); // Reset bottom nav index
+        context.go('/'); // Navigate to login screen
+      } else {
+        bottomNavBarIndexProvider.setIndex(index);
+        Navigator.pop(context); // Close the drawer
+        if (index == 0) {
+          context.go('/main');
+        } else if (index == 1) {
+          context.go('/main');
+        } else if (index == 2) {
+          context.go('/main');
+        }
       }
-      Navigator.pop(context);
     }
 
     return Drawer(

@@ -59,17 +59,16 @@ class FirebaseService {
     }
   }
 
-  Future<void> updateRecord(MyRecord record,int id) async {
+  Future<MyRecord> getRecordById(int id) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('records')
-          .doc(id.toString())
-          .update(record.toJson());
-      print('Record updated successfully');
+      final docSnapshot = await _db.collection('records').doc(id.toString()).get();
+      return MyRecord.fromJson(docSnapshot.data()!);
     } catch (e) {
       // ignore: avoid_print
-      print('Error updating record: $e');
+      print('Error loading record: $e');
+      return MyRecord();
     }
   }
+
 
 }

@@ -10,6 +10,9 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:term_project/models/my_record.dart';
 import 'package:term_project/services/firestore_service.dart';
 import 'package:term_project/services/firebase_photo_service.dart';
+import 'package:term_project/services/image_analysis_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CameraService {
   Future<MyRecord?> takePicture(BuildContext context) async {
@@ -49,22 +52,11 @@ class CameraService {
       String? photoUrl = await photoService.uploadPhoto(imageFile);
       if (photoUrl != null) {
         int recordId = await FirebaseService.instance.getAndUpdateId();
-
-        String currentDateTime = DateFormat('yyyy/MM/dd').format(DateTime.now());
-
-        MyRecord newRecord = MyRecord(
-          id: recordId,
-          foodName: 'Unknown',
-          foodImage: photoUrl,
-          calories: 'Unknown',
-          protein: 'Unknown',
-          fat: 'Unknown',
-          carbs: 'Unknown',
-          dateTime: currentDateTime, // Save the current date and time
-        );
+        ImageAnalysisService imageAnalysisService = ImageAnalysisService();
+        MyRecord? newRecord = await imageAnalysisService.analyzeImageAndGetRecord(photoUrl, recordId.toString());
 
         // Save the record to Firebase
-        await FirebaseService.instance.saveRecord(newRecord);
+        await FirebaseService.instance.saveRecord(newRecord!);
 
         print('Photo uploaded and available at: $photoUrl');
         return newRecord;

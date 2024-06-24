@@ -5,7 +5,6 @@ import 'package:term_project/models/my_user.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:term_project/widgets/recent_photo.dart';
 import 'package:go_router/go_router.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/theme_provider.dart';
 
@@ -20,30 +19,29 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   User? user = FirebaseAuth.instance.currentUser;
   MyUser? myUser;
   double bmr = 0.0;
-  double tdee = 0.0;
+  double calories = 0.0;
+  double protein = 0.0;
+  double fat = 0.0;
+  double carbs = 0.0;
+  double bmi = 0.0;
 
   late AnimationController _controller1;
   late AnimationController _controller2;
   late AnimationController _controller3;
   late AnimationController _controller4;
   late AnimationController _controller5;
-  late AnimationController _controller6;
 
   late Animation<double> _animation1;
   late Animation<double> _animation2;
   late Animation<double> _animation3;
   late Animation<double> _animation4;
   late Animation<double> _animation5;
-  late Animation<double> _animation6;
 
   late Animation<double> _opacityAnimation1;
   late Animation<double> _opacityAnimation2;
   late Animation<double> _opacityAnimation3;
   late Animation<double> _opacityAnimation4;
   late Animation<double> _opacityAnimation5;
-  late Animation<double> _opacityAnimation6;
-
-  final List<bool> _isVisible = [false, false, false, false, false, false];
 
   @override
   void initState() {
@@ -66,10 +64,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       vsync: this,
     );
     _controller5 = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-    _controller6 = AnimationController(
       duration: const Duration(milliseconds: 250),
       vsync: this,
     );
@@ -104,12 +98,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         curve: Curves.easeOut,
       ),
     );
-    _animation6 = Tween<double>(begin: 15.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller6,
-        curve: Curves.easeOut,
-      ),
-    );
 
     _opacityAnimation1 = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -141,16 +129,27 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         curve: Curves.easeOut,
       ),
     );
-    _opacityAnimation6 = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller6,
-        curve: Curves.easeOut,
-      ),
-    );
 
     if (user != null) {
       _fetchUserData();
     }
+
+    // Start the animations
+    _controller1.forward();
+    _controller2.forward();
+    _controller3.forward();
+    _controller4.forward();
+    _controller5.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller1.dispose();
+    _controller2.dispose();
+    _controller3.dispose();
+    _controller4.dispose();
+    _controller5.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchUserData() async {
@@ -166,7 +165,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           myUser = MyUser.fromMap(snapshot.data()!);
           bmr = _calculateBMR(
               myUser!.age ?? 0, myUser!.height ?? 0.0, myUser!.weight ?? 0.0);
-          tdee = _calculateTDEE(bmr);
+          bmi = _calculateBMI(myUser!.height ?? 0.0, myUser!.weight ?? 0.0);
         });
       }
     } catch (e) {
@@ -179,109 +178,23 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     return 66 + (6.23 * weight) + (12.7 * height) - (6.8 * age);
   }
 
-  double _calculateTDEE(double bmr) {
-    // Assuming sedentary lifestyle (activity factor = 1.2)
-    return bmr * 1.2;
+  double _calculateBMI(double height, double weight) {
+    return weight / ((height / 100) * (height / 100));
   }
 
-  void _onVisibilityChanged(bool visible, int index) {
-    if (visible) {
-      if (!_isVisible[index]) {
-        _isVisible[index] = true;
-        _getController(index).reset();
-        _getController(index).forward();
-      }
-    } else {
-      _isVisible[index] = false;
-      _getController(index).reset();
-    }
-  }
-
-  AnimationController _getController(int index) {
-    switch (index) {
-      case 0:
-        return _controller1;
-      case 1:
-        return _controller2;
-      case 2:
-        return _controller3;
-      case 3:
-        return _controller4;
-      case 4:
-        return _controller5;
-      case 5:
-      default:
-        return _controller6;
-    }
-  }
-
-  Animation<double> _getOpacityAnimation(int index) {
-    switch (index) {
-      case 0:
-        return _opacityAnimation1;
-      case 1:
-        return _opacityAnimation2;
-      case 2:
-        return _opacityAnimation3;
-      case 3:
-        return _opacityAnimation4;
-      case 4:
-        return _opacityAnimation5;
-      case 5:
-      default:
-        return _opacityAnimation6;
-    }
-  }
-
-  Animation<double> _getAnimation(int index) {
-    switch (index) {
-      case 0:
-        return _animation1;
-      case 1:
-        return _animation2;
-      case 2:
-        return _animation3;
-      case 3:
-        return _animation4;
-      case 4:
-        return _animation5;
-      case 5:
-      default:
-        return _animation6;
-    }
-  }
-
-  Widget _buildCircularProgressIndicator(double value, String label, double maxValue) {
+  Widget _buildLinearProgressIndicator(double value, String label, double maxValue) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        SizedBox(
-          height: 80, // Adjusted height
-          width: 80, // Adjusted width
-          child: Stack(
-            children: [
-              Center(
-                child: Container(
-                  height: 80, // Match the size of the SizedBox
-                  width: 80, // Match the size of the SizedBox
-                  child: CircularProgressIndicator(
-                    value: value / maxValue,
-                    strokeWidth: 8, // Adjusted stroke width
-                    backgroundColor: Colors.grey[300],
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  '${(value / maxValue * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        LinearProgressIndicator(
+          value: value / maxValue,
+          minHeight: 10,
+          backgroundColor: Colors.grey[300],
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 14)),
+        Text('${(value / maxValue * 100).toStringAsFixed(1)}%', style: const TextStyle(fontSize: 14)),
       ],
     );
   }
@@ -324,168 +237,129 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ClipPath(
                       clipper: CurvedBottomClipper(),
                       child: Container(
-                        height: 420,
+                        height: 620,
                         color: themeProvider.isDarkTheme
                             ? const Color.fromARGB(255, 44, 10, 106)?.withOpacity(0.5)
-                            : Colors.green[200]?.withOpacity(1), // Color based on theme
+                            : Colors.green[100]?.withOpacity(1), // Color based on theme
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             const SizedBox(height: 40),
-                            VisibilityDetector(
-                              key: Key('greeting'),
-                              onVisibilityChanged: (visibilityInfo) {
-                                _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 0);
-                              },
-                              child: AnimatedBuilder(
-                                animation: _controller1,
-                                builder: (context, child) {
-                                  return FadeTransition(
-                                    opacity: _getOpacityAnimation(0),
-                                    child: Transform.translate(
-                                      offset: Offset(0, _getAnimation(0).value),
-                                      child: Text(
-                                        'Hi, ${myUser?.username ?? 'User'}', // Display username if available
-                                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                                      ),
+                            AnimatedBuilder(
+                              animation: _controller1,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _opacityAnimation1,
+                                  child: Transform.translate(
+                                    offset: Offset(0, _animation1.value),
+                                    child: Text(
+                                      'Hi, ${myUser?.username ?? 'User'}', // Display username if available
+                                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 16),
-                            VisibilityDetector(
-                              key: Key('caloriesLeftLabel'),
-                              onVisibilityChanged: (visibilityInfo) {
-                                _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 1);
-                              },
-                              child: AnimatedBuilder(
-                                animation: _controller2,
-                                builder: (context, child) {
-                                  return FadeTransition(
-                                    opacity: _getOpacityAnimation(1),
-                                    child: Transform.translate(
-                                      offset: Offset(0, _getAnimation(1).value),
-                                      child: const Text(
-                                        'Calories Left',
-                                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                                      ),
+                            AnimatedBuilder(
+                              animation: _controller2,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _opacityAnimation2,
+                                  child: Transform.translate(
+                                    offset: Offset(0, _animation2.value),
+                                    child: const Text(
+                                      'Calories Left',
+                                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 8),
-                            VisibilityDetector(
-                              key: Key('caloriesLeftValue'),
-                              onVisibilityChanged: (visibilityInfo) {
-                                _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 2);
-                              },
-                              child: AnimatedBuilder(
-                                animation: _controller3,
-                                builder: (context, child) {
-                                  return FadeTransition(
-                                    opacity: _getOpacityAnimation(2),
-                                    child: Transform.translate(
-                                      offset: Offset(0, _getAnimation(2).value),
-                                      child: Text(
-                                        '${2000}', // Adjust the calculation as needed
-                                        style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.orange),
-                                      ),
+                            AnimatedBuilder(
+                              animation: _controller3,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _opacityAnimation3,
+                                  child: Transform.translate(
+                                    offset: Offset(0, _animation3.value),
+                                    child: Text(
+                                      '${calories.toStringAsFixed(0)}', // Adjust the calculation as needed
+                                      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.orange),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 8),
-                            VisibilityDetector(
-                              key: Key('caloriesGoalLabel'),
-                              onVisibilityChanged: (visibilityInfo) {
-                                _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 3);
-                              },
-                              child: AnimatedBuilder(
-                                animation: _controller4,
-                                builder: (context, child) {
-                                  return FadeTransition(
-                                    opacity: _getOpacityAnimation(3),
-                                    child: Transform.translate(
-                                      offset: Offset(0, _getAnimation(3).value),
-                                      child: const Text(
-                                        'of 2000 kcal', // Adjust the calculation as needed
-                                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                                      ),
+                            AnimatedBuilder(
+                              animation: _controller4,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _opacityAnimation4,
+                                  child: Transform.translate(
+                                    offset: Offset(0, _animation4.value),
+                                    child: Text(
+                                      'of ${bmr.toStringAsFixed(0)} kcal', // Adjust the calculation as needed
+                                      style: const TextStyle(fontSize: 16, color: Colors.grey),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 16),
-                            VisibilityDetector(
-                              key: Key('progressIndicators'),
-                              onVisibilityChanged: (visibilityInfo) {
-                                _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 4);
-                              },
-                              child: AnimatedBuilder(
-                                animation: _controller5,
-                                builder: (context, child) {
-                                  return FadeTransition(
-                                    opacity: _getOpacityAnimation(4),
-                                    child: Transform.translate(
-                                      offset: Offset(0, _getAnimation(4).value),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            _buildCircularProgressIndicator(tdee, 'TDEE', 2500),
-                                            const SizedBox(width: 16),
-                                            _buildCircularProgressIndicator(bmr, 'BMR', 2500),
-                                          ],
-                                        ),
+                            AnimatedBuilder(
+                              animation: _controller5,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _opacityAnimation5,
+                                  child: Transform.translate(
+                                    offset: Offset(0, _animation5.value),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                                      child: Column(
+                                        children: <Widget>[
+                                          _buildLinearProgressIndicator(protein, 'Protein', 100),
+                                          const SizedBox(height: 16),
+                                          _buildLinearProgressIndicator(fat, 'Fat', 70),
+                                          const SizedBox(height: 16),
+                                          _buildLinearProgressIndicator(carbs, 'Carbs', 300),
+                                          const SizedBox(height: 16),
+                                          _buildLinearProgressIndicator(bmi, 'BMI', 40),
+                                        ],
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 16),
                           ],
                         ),
                       ),
                     ),
-                    VisibilityDetector(
-                      key: Key('recentFoodData'),
-                      onVisibilityChanged: (visibilityInfo) {
-                        _onVisibilityChanged(visibilityInfo.visibleFraction > 0.1, 5);
-                      },
-                      child: AnimatedBuilder(
-                        animation: _controller6,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _getOpacityAnimation(5),
-                            child: Transform.translate(
-                              offset: Offset(0, _getAnimation(5).value),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text(
-                                      'Your recent food data',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    RecentPhoto(
-                                      onCaloriesChanged: (int totalCalories) {
-                                        // Handle the calories change if needed
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const Text(
+                            'Your recent food data',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          RecentPhoto(
+                            onCaloriesChanged: (int totalCalories, double totalProtein, double totalFat, double totalCarbs) {
+                              setState(() {
+                                calories = totalCalories.toDouble();
+                                protein = totalProtein;
+                                fat = totalFat;
+                                carbs = totalCarbs;
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],

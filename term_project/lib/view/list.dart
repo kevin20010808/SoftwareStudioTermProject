@@ -8,6 +8,8 @@ import 'package:term_project/services/providers/image_provider.dart';
 import 'package:term_project/widgets/my_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:term_project/services/providers/theme_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -20,11 +22,26 @@ class _ListScreenState extends State<ListScreen> {
   final CameraService _cameraService = CameraService();
   List<MyRecord> records = [];
   String _selectedTab = 'All'; // Track the selected tab
+  String _currentUsername = ''; // Track the current user's username
 
   @override
   void initState() {
     super.initState();
+    _fetchCurrentUsername();
     _loadRecords();
+  }
+
+  Future<void> _fetchCurrentUsername() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+
+    setState(() {
+      _currentUsername = snapshot.data()?['username'] ?? 'Unknown';
+    });
   }
 
   Future<void> _loadRecords() async {
@@ -35,8 +52,8 @@ class _ListScreenState extends State<ListScreen> {
   @override
   Widget build(BuildContext context) {
     List<MyRecord> filteredRecords = _selectedTab == 'All'
-        ? records
-        : records.where((record) => record.dateTime == DateFormat('yyyy/MM/dd').format(DateTime.now())).toList();
+        ? records.where((record) => record.username == _currentUsername).toList()
+        : records.where((record) => record.dateTime == DateFormat('yyyy-MM-dd').format(DateTime.now()) && record.username == _currentUsername).toList();
 
     // Sort records by dateTime in descending order
     filteredRecords.sort((a, b) => b.dateTime.compareTo(a.dateTime));
@@ -143,8 +160,9 @@ class _ListScreenState extends State<ListScreen> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
                                 image: DecorationImage(
-                                  // image: AssetImage(filteredRecords[index].foodImage),
-                                  image: AssetImage('assets/food_2.jpg'),
+                                  image: filteredRecords[index].foodImage.isNotEmpty
+                                      ? NetworkImage(filteredRecords[index].foodImage)
+                                      : AssetImage('assets/placeholder_image.jpg') as ImageProvider, // Placeholder for empty image URLs
                                   fit: BoxFit.fill,
                                 ),
                                 boxShadow: [
@@ -166,14 +184,20 @@ class _ListScreenState extends State<ListScreen> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: <Widget>[
-                                            Text(
-                                              "${records[index].foodName}",
-                                              style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+                                            Container(
+                                              color: Colors.black.withOpacity(0.5), // Semi-transparent black background
+                                              child: Text(
+                                                "${filteredRecords[index].foodName}",
+                                                style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+                                              ),
                                             ),
                                             SizedBox(height: 130),
-                                            Text(
-                                              'Date: ${records[index].dateTime}',
-                                              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                                            Container(
+                                              color: Colors.black.withOpacity(0.5), // Semi-transparent black background
+                                              child: Text(
+                                                'Date: ${filteredRecords[index].dateTime}',
+                                                style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                                              ),
                                             ),
                                           ],
                                         ),

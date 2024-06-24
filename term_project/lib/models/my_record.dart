@@ -9,7 +9,8 @@ class MyRecord {
   String fat;
   String carbs; 
   String weight;
-  String dateTime; // New field
+  String dateTime;
+  String username; // New field
 
   MyRecord({
     this.id = 0,
@@ -20,7 +21,8 @@ class MyRecord {
     this.fat = '',
     this.carbs = '',
     this.weight = '',
-    this.dateTime = '', // Initialize new field
+    this.dateTime = '',
+    this.username = '', // Initialize new field
   });
 
   factory MyRecord.fromJson(Map<String, dynamic> firestore) {
@@ -33,7 +35,8 @@ class MyRecord {
       fat: firestore['fat'] ?? '',
       carbs: firestore['carbs'] ?? '',
       weight: firestore['weight'] ?? '',
-      dateTime: firestore['dateTime'] ?? '', // Extract date
+      dateTime: firestore['dateTime'] ?? '',
+      username: firestore['username'] ?? '', // Extract username
     );
   }
 
@@ -47,11 +50,12 @@ class MyRecord {
       'fat': fat,
       'carbs': carbs,
       'weight': weight,
-      'dateTime': dateTime, // Include date
+      'dateTime': dateTime,
+      'username': username, // Include username
     };
   }
 
-  MyRecord add(String photoUrl, int id) {
+  MyRecord add(String photoUrl, int id, String username) {
     String currentDateTime = DateFormat('yyyy/MM/dd').format(DateTime.now());
     return MyRecord(
       id: id,
@@ -62,7 +66,8 @@ class MyRecord {
       fat: 'Fat: 5g',
       carbs: 'Carbs: 20g',
       weight: 'Weight: 100g',
-      dateTime: currentDateTime, // Use formatted date
+      dateTime: currentDateTime,
+      username: username, // Use provided username
     );
   }
 }
