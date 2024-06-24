@@ -177,6 +177,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      sha256: "11e40df547d418cc0c4900a9318b26304e665da6fa4755399a9ff9efd09034b5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.4.3+1"
   fake_async:
     dependency: transitive
     description:
@@ -334,6 +342,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_gemini:
+    dependency: "direct main"
+    description:
+      name: flutter_gemini
+      sha256: c6079dc6f95c6191e609e9cc627c268ef0bf2526cbba6a2f61aa41ea0053e9a0
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.4"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -384,6 +400,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      sha256: c3fd9336eb55a38cc1bbd79ab17573113a8deccd0ecbbf926cca3c62803b5c2d
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.1"
   go_router:
     dependency: "direct main"
     description:
@@ -404,10 +428,10 @@ packages:
     dependency: "direct main"
     description:
       name: google_generative_ai
-      sha256: f666a8c09225630a9ab366296407b38c6dab87ba7b1bce15a7db35e9411c17d3
+      sha256: "76e35d93b8c1cd888f69a1a371f8c5dc54cec372b6c74a4c0a5d506e7cf82c1a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.3"
+    version: "0.4.3"
   google_identity_services_web:
     dependency: transitive
     description:
@@ -568,6 +592,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.0"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.9.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -1029,6 +1061,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  visibility_detector:
+    dependency: "direct main"
+    description:
+      name: visibility_detector
+      sha256: ec932527913f32f65aa01d3a393504240b9e9021ecc77123f017755605e48832
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   vm_service:
     dependency: transitive
     description:

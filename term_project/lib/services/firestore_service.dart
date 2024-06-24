@@ -47,10 +47,9 @@ class FirebaseService {
 
   Future<bool> saveRecord(MyRecord record) async {
     try {
-      int recordId = await getAndUpdateId();
       await FirebaseFirestore.instance
           .collection('records')
-          .doc(recordId.toString())
+          .doc(record.id.toString())
           .set(record.toJson());
       return true;
     } catch (e) {
@@ -60,6 +59,17 @@ class FirebaseService {
     }
   }
 
-
+  Future<void> updateRecord(MyRecord record,int id) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('records')
+          .doc(id.toString())
+          .update(record.toJson());
+      print('Record updated successfully');
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error updating record: $e');
+    }
+  }
 
 }

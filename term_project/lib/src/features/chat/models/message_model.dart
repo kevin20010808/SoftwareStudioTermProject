@@ -1,7 +1,7 @@
 class MessageModel {
   final String text;
-  final String role;
-  final String id;
+  final String imageUrl;
+  final bool isUser;
 
-  MessageModel({required this.text, required this.role, required this.id});
+  MessageModel({this.text = '', this.imageUrl = '', required this.isUser});
 }

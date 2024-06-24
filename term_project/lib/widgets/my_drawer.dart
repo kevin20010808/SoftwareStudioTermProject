@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:term_project/models/my_user.dart';
 import 'package:term_project/services/providers/navbar_index_provider.dart';
+import 'package:term_project/services/providers/theme_provider.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -58,68 +59,100 @@ class MyDrawer extends StatelessWidget {
             return const Center(child: Text('Error fetching user data'));
           } else {
             MyUser? myUser = snapshot.data;
-            return ListView(
-              children: [
-                UserAccountsDrawerHeader(
-                  decoration:
-                      const BoxDecoration(color: Color.fromARGB(232, 2, 95, 64)),
-                  accountName: Text(myUser?.username ?? ''),
-                  accountEmail: Text(user?.email ?? ''),
-                  currentAccountPicture: const CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person),
-                  ),
-                ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: 4,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index == 3) {
-                      return Column(
-                        children: [
-                          const Row(
+            return Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return ListView(
+                  children: [
+                    Stack(
+                      children: [
+                        UserAccountsDrawerHeader(
+                          decoration: BoxDecoration(
+                            color: themeProvider.isDarkTheme
+                                ? const Color.fromARGB(255, 44, 10, 106).withOpacity(1)
+                                : const Color.fromARGB(232, 2, 95, 64),
+                          ),
+                          accountName: Text(myUser?.username ?? ''),
+                          accountEmail: Text(user?.email ?? ''),
+                          currentAccountPicture: const CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.person),
+                          ),
+                        ),
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: ThemeToggleButton(),
+                        ),
+                      ],
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: 4,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 3) {
+                          return Column(
                             children: [
-                              Expanded(
-                                flex: 6,
-                                child: Divider(),
+                              const Row(
+                                children: [
+                                  Expanded(
+                                    flex: 6,
+                                    child: Divider(),
+                                  ),
+                                  Spacer(flex: 1),
+                                ],
                               ),
-                              Spacer(flex: 1),
+                              ListTile(
+                                title: const Text(
+                                  'Logout',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                onTap: () => onItemTapped(index),
+                              ),
                             ],
-                          ),
-                          ListTile(
-                            title: const Text(
-                              'Logout',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            onTap: () => onItemTapped(index),
-                          ),
-                        ],
-                      );
-                    }
+                          );
+                        }
 
-                    String title = '';
-                    switch (index) {
-                      case 0:
-                        title = 'Home';
-                        break;
-                      case 1:
-                        title = 'List';
-                        break;
-                      case 2:
-                        title = 'Profile';
-                        break;
-                    }
-                    return ListTile(
-                      title: Text(title),
-                      onTap: () => onItemTapped(index),
-                    );
-                  },
-                ),
-              ],
+                        String title = '';
+                        switch (index) {
+                          case 0:
+                            title = 'Home';
+                            break;
+                          case 1:
+                            title = 'List';
+                            break;
+                          case 2:
+                            title = 'Profile';
+                            break;
+                        }
+                        return ListTile(
+                          title: Text(title),
+                          onTap: () => onItemTapped(index),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
             );
           }
         },
       ),
+    );
+  }
+}
+
+class ThemeToggleButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return IconButton(
+          icon: Icon(themeProvider.isDarkTheme ? Icons.dark_mode : Icons.light_mode),
+          onPressed: () {
+            themeProvider.toggleTheme();
+          },
+        );
+      },
     );
   }
 }

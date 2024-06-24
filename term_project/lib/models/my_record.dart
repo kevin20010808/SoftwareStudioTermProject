@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class MyRecord {
   int id;
   String foodName;
@@ -47,5 +49,20 @@ class MyRecord {
       'weight': weight,
       'dateTime': dateTime, // Include date
     };
+  }
+
+  MyRecord add(String photoUrl, int id) {
+    String currentDateTime = DateFormat('yyyy/MM/dd').format(DateTime.now());
+    return MyRecord(
+      id: id,
+      foodName: 'Food Name',
+      foodImage: photoUrl, 
+      calories: 'Calories: 100',
+      protein: 'Protein: 10g',
+      fat: 'Fat: 5g',
+      carbs: 'Carbs: 20g',
+      weight: 'Weight: 100g',
+      dateTime: currentDateTime, // Use formatted date
+    );
   }
 }

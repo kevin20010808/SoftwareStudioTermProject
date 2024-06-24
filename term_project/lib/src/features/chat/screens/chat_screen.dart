@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:term_project/src/constants/colors.dart';
 import 'package:term_project/src/features/chat/components/message_tile.dart';
-//import 'package:flutter_gemini/src/features/chat/components/send_message_widget.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:term_project/src/features/chat/models/url_utils.dart'; // Utility to detect URLs
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -13,7 +15,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-
   List<Content> history = [];
   late final GenerativeModel _model;
   late final ChatSession _chat;
@@ -21,15 +22,13 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _textFieldFocus = FocusNode();
   bool _loading = false;
-  static const _apiKey = 'AIzaSyBn4XmRa5Y7itICG5y557PUpZf21CRDvQc'; // https://ai.google.dev/ (Get API key from this link)
+  static const _apiKey = 'AIzaSyBn4XmRa5Y7itICG5y557PUpZf21CRDvQc';
 
   void _scrollDown() {
     WidgetsBinding.instance.addPostFrameCallback(
-          (_) => _scrollController.animateTo(
+      (_) => _scrollController.animateTo(
         _scrollController.position.minScrollExtent,
-        duration: const Duration(
-          milliseconds: 750,
-        ),
+        duration: const Duration(milliseconds: 750),
         curve: Curves.easeOutCirc,
       ),
     );
@@ -39,7 +38,8 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _model = GenerativeModel(
-      model: 'gemini-pro', apiKey: _apiKey,
+      model: 'gemini-pro',
+      apiKey: _apiKey,
     );
     _chat = _model.startChat();
   }
@@ -58,20 +58,27 @@ class _ChatScreenState extends State<ChatScreen> {
             itemCount: history.reversed.length,
             controller: _scrollController,
             reverse: true,
-            itemBuilder: (context, index){
+            itemBuilder: (context, index) {
               var content = history.reversed.toList()[index];
-              var text = content.parts
-                  .whereType<TextPart>()
-                  .map<String>((e) => e.text)
-                  .join('');
-              return MessageTile(
-                sendByMe: content.role == 'user',
-                message: text,
+              var text = content.parts.whereType<TextPart>().map<String>((e) => e.text).join('');
+              var imageUrls = extractUrls(text).where((url) => isImageUrl(url)).toList();
 
+              return Column(
+                crossAxisAlignment: content.role == 'user' ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  if (text.isNotEmpty) MessageTile(
+                    sendByMe: content.role == 'user',
+                    message: text,
+                  ),
+                  ...imageUrls.map((imageUrl) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Image.network(imageUrl),
+                  )),
+                ],
               );
             },
-            separatorBuilder: (context, index){
-              return const SizedBox(height: 15,);
+            separatorBuilder: (context, index) {
+              return const SizedBox(height: 15);
             },
           ),
           Align(
@@ -80,8 +87,8 @@ class _ChatScreenState extends State<ChatScreen> {
               width: MediaQuery.of(context).size.width,
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
               decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(top: BorderSide(color: Colors.grey.shade200))
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey.shade200)),
               ),
               child: Row(
                 children: [
@@ -94,45 +101,53 @@ class _ChatScreenState extends State<ChatScreen> {
                         autofocus: true,
                         focusNode: _textFieldFocus,
                         decoration: InputDecoration(
-                            hintText: 'Ask me anything...',
-                            hintStyle: const TextStyle(color: Colors.grey),
-                            filled: true, fillColor: Colors.grey.shade200,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(10)
-                            )
+                          hintText: 'Ask me anything...',
+                          hintStyle: const TextStyle(color: Colors.grey),
+                          filled: true,
+                          fillColor: Colors.grey.shade200,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10,),
+                  const SizedBox(width: 10),
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       setState(() {
                         history.add(Content('user', [TextPart(_textController.text)]));
                       });
                       _sendChatMessage(_textController.text, history.length);
                     },
                     child: Container(
-                      width: 50, height: 50,
+                      width: 50,
+                      height: 50,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                          color: MyColors.primaryColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(offset: const Offset(1,1), blurRadius: 3, spreadRadius: 3, color: Colors.black.withOpacity(0.05))
-                          ]
+                        color: MyColors.primaryColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            offset: const Offset(1, 1),
+                            blurRadius: 3,
+                            spreadRadius: 3,
+                            color: Colors.black.withOpacity(0.05),
+                          ),
+                        ],
                       ),
                       child: _loading
                           ? const Padding(
-                            padding: EdgeInsets.all(15.0),
-                            child: CircularProgressIndicator.adaptive(
-                                                    backgroundColor: Colors.white, ),
-                          )
-                          : const Icon(Icons.send_rounded, color: Colors.white,),
+                              padding: EdgeInsets.all(15.0),
+                              child: CircularProgressIndicator.adaptive(
+                                backgroundColor: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.send_rounded, color: Colors.white),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -156,25 +171,26 @@ class _ChatScreenState extends State<ChatScreen> {
       var response = _chat.sendMessageStream(
         Content.text(message),
       );
-      await for(var item in response){
-        var text = item.text;
-        if (text == null) {
-          _showError('No response from API.');
-          return;
-        } else {
-          setState(() {
-            _loading = false;
+      await for (var item in response) {
+        if (item is GenerateContentResponse) {
+          var text = item.text ?? '';
+          var imageUrls = extractUrls(text).where((url) => isImageUrl(url)).toList();
+          if (text.isNotEmpty) {
             parts.add(TextPart(text));
-            if((history.length - 1) == historyIndex){
-              history.removeAt(historyIndex);
-            }
-            history.insert(historyIndex, Content('model', parts));
-
-          });
+          }
+          for (var imageUrl in imageUrls) {
+            parts.add(TextPart(imageUrl)); // Treat image URLs as text for now
+          }
+          await _writeResponseToFile(text); // Write the AI response to file
         }
+        setState(() {
+          if ((history.length - 1) == historyIndex) {
+            history.removeAt(historyIndex);
+          }
+          history.insert(historyIndex, Content('model', parts));
+          _loading = false;
+        });
       }
-
-
     } catch (e, t) {
       print(e);
       print(t);
@@ -187,6 +203,12 @@ class _ChatScreenState extends State<ChatScreen> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _writeResponseToFile(String response) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/chat_responses.txt');
+    await file.writeAsString('$response\n', mode: FileMode.append);
   }
 
   void _showError(String message) {
@@ -210,5 +232,4 @@ class _ChatScreenState extends State<ChatScreen> {
       },
     );
   }
-  
 }
