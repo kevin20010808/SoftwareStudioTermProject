@@ -2,7 +2,7 @@
 import 'dart:typed_data';
 
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:term_project/models/my_record.dart';
@@ -54,6 +54,8 @@ Future<MyRecord?> takePicture(BuildContext context) async {
     
     FirebasePhotoService photoService = FirebasePhotoService();
     String? photoUrl = await photoService.uploadPhoto(imageFile);
+
+    print('photoUrl: $photoUrl, is well');
     if (photoUrl != null) {
 
       int recordId = await FirebaseService.instance.getAndUpdateId();
@@ -61,10 +63,9 @@ Future<MyRecord?> takePicture(BuildContext context) async {
       ImageAnalysisService imageService = ImageAnalysisService();
       //analyze image
       MyRecord? record = await imageService.analyzeImageAndGetRecord(photoUrl,recordId.toString());
-
+      // print('record: $record, is well');
       // Save the record to Firebase
       await FirebaseService.instance.saveRecord(record!);
-
 
       // ignore: avoid_print
       print('Photo uploaded and available at: $photoUrl');
