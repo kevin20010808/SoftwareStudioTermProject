@@ -1,5 +1,4 @@
-# term_SoftwareStudio_NTHU
-
+# SoftwareStudioTermProject
 
 
 ## Step 1 Empathy maps & user journey maps
